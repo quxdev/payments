@@ -1,20 +1,15 @@
-# import datetime
-import os
-from django.shortcuts import render
-from django.http import HttpResponseRedirect
-from django.views.decorators.csrf import csrf_exempt
-from django.forms.models import model_to_dict
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
-# from django.utils import timezone
-from django.urls import reverse
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 
-from ..models import *
+from .razorpay.views import razorpay_create_order
+from .razorpay.views import razorpay_verify_signature
 from .swipez.views import swipez_payment
 from .swipez.views import swipez_payment_payload
 from .swipez.views import swipez_webhook_payload
-from .razorpay.views import razorpay_create_order
-from .razorpay.views import razorpay_verify_signature
+from ..models import *
 
 
 @login_required
@@ -25,26 +20,20 @@ def getitem(request, productsku: str):
 
     # invoice = Invoice.create(request.user)
     # invoice.additem(productsku)
-    todayDate = timezone.now().today().date()
     product = Product.objects.get_or_none(sku=productsku)
     if product is None or product.is_active is False:
         raise Http404('Product not exists')
 
     # Customer create
-    customer_obj = Customer.objects.filter(primary_contact=user).last()
-    if not customer_obj:
+    customer_obj = Customer.objects.get_or_none(primary_contact=user)
+    if customer_obj is None:
         customer_obj, created = Customer.objects.get_or_create(
             primary_contact=user
         )
         if created:
             customer_obj.email = user.email
             customer_obj.phone = user.profile.phone
-            if user.first_name and user.last_name:
-                customer_obj.contact_name = user.first_name + " " + user.last_name
-            elif user.first_name:
-                customer_obj.contact_name = user.first_name
-            elif user.last_name:
-                customer_obj.contact_name = user.last_name
+            customer_obj.contact_name = user.profile.get_fullname()
             customer_obj.users.add(user)
             customer_obj.save()
 
@@ -61,18 +50,20 @@ def getitem(request, productsku: str):
 
 
 def send_email_on_payment_visit(cart):
-    subject = "New Payment visit cart: " + str(cart.slug)
+    # subject = "New Payment visit cart: " + str(cart.slug)
 
-    message = cart.to_text()
+    # message = cart.to_text()
 
-    json_data = {
-        'targets': settings.TEAM_SALES,
-        'subject': subject,
-        'message': message,
-        'sender': 'no-reply@blacklab.app',
-    }
+    # json_data = {
+    #     'targets': settings.TEAM_SALES,
+    #     'subject': subject,
+    #     'message': message,
+    #     'sender': 'no-reply@blacklab.app',
+    # }
 
     # create_async_task('core.comm.tasks.send_async_email', json_data)
+
+    pass
 
 
 # @login_required
@@ -90,10 +81,15 @@ def getpaid(request, slug: str):
     if cart.is_open is False:
         raise Http404('Cart is already closed. Thank you')
     if cart.customer.gstin in ['', None] and cart.customer.pan in ['', None]:
-        next = '?next='+reverse('customer:payment', kwargs={'slug': slug})
+        next_page = '?next='+reverse('customer:payment', kwargs={'slug': slug})
         if request.user.is_staff or request.user.is_superuser:
-            return HttpResponseRedirect(reverse('account_kyc', kwargs={'userid': cart.customer.primary_contact_id})+next)
-        return HttpResponseRedirect(reverse('account_kyc')+next)
+            url = reverse(
+                'account_kyc',
+                kwargs={'userid': cart.customer.primary_contact_id}
+            )
+            return HttpResponseRedirect(url+next_page)
+
+        return HttpResponseRedirect(reverse('account_kyc')+next_page)
 
     send_email_on_payment_visit(cart)
 
@@ -106,11 +102,9 @@ def getpaid(request, slug: str):
         return swipez_payment(payload)
 
     elif settings.PAYMENT_PROVIDER == 'RazorPay':
-        jsondata = cart.razorpay_payload()
-        action_url = reverse('customer:webhook', kwargs={'reference': jsondata['receipt']})
-        print('action_url =', action_url)
-        # print('jsondata =', jsondata)
-        return razorpay_create_order(request, jsondata, action_url)
+        rawdata = cart.razorpay_payload()
+        action_url = reverse('customer:webhook', kwargs={'reference': rawdata['receipt']})
+        return razorpay_create_order(request, rawdata, action_url)
 
 
 @csrf_exempt

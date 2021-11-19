@@ -61,9 +61,11 @@
     <div class="col-12 col-sm-6">
       <div class="row">
         <div class="col-12 my-2">
-          <div>Seller: <b>1E9 Solutions</b></div>
-          <div>Pune &bullet; MH 411007</div>
-          <div>GSTIN: <span class="text-muted">27AACFZ2951K1ZS</span></div>
+          <div>Seller: <b>{{ payments.seller }}</b></div>
+          <div>{{ payments.address }}</div>
+          {% if payments.gstin %}
+          <div>GSTIN: <span class="text-muted">{{ payments.gstin }}</span></div>
+          {% endif %}
         </div>
         <div class="col-12 my-2">
           {# DEBUG FOR VISHAL ONLY #}
