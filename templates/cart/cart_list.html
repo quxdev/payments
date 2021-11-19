@@ -1,0 +1,95 @@
+{% extends '_blank.html' %}
+{% load static %}
+
+{% block stylesheets %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/listview.css' %}">
+{% endblock stylesheets %}
+
+{% block customstyle %}
+{{ block.super }}
+<style>
+body {
+  background: rgb(236, 240, 248) !important;
+}
+.table thead {
+  background: rgba(0, 0, 0, 0.20);
+}
+.table tbody {
+  background: white;
+}
+.table tbody tr {
+  cursor: pointer;
+}
+.table th, .table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid rgb(229, 231, 233);
+}
+</style>
+{% endblock %}
+
+{% block rawcontent %}
+{{ block.super }}
+  <div class="container-md">
+    <div class="form-container py-4 p-md-4">
+      <div class="form_prefix">
+        <span>
+          <a href="#" class="btn p-0"
+             data-toggle="tooltip" data-placement="right" title="Home">
+            <i class="fas fa-2x fa-square"></i>
+          </a>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-xl my-4">
+    <div id="cart_list" class="">
+      <h1 class="py-4">
+        Carts
+      </h1>
+
+      <table class="table table-hover table-borderless table-sm">
+        <thead>
+          <tr>
+            <th scope="col" class="d-none d-sm-table-cell">Cart No</th>
+            <th scope="col" class="d-none d-sm-table-cell">Customer</th>
+            <th scope="col" class="d-none d-sm-table-cell">Cart Type</th>
+            <th scope="col" class="d-none d-sm-table-cell">Is Open</th>
+            <th scope="col" class="">Date</th>
+            <th scope="col" class="text-right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if object_list %}
+          {% for post in object_list %}
+          <tr class="row_{{ post.id }}" onclick="location.href='{% url 'customer:cart_edit' post.id %}'">
+            <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">{{ post.slug }}</code></td>
+            <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">{{ post.customer.name }}</code></td>
+            <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">{{ post.cart_type }}</code></td>
+            <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">{{ post.is_open }}</code></td>
+            <td class="text-nowrap">{{ post.dtm_created }}</td>
+            <td class="text-right">{{ post.total_amount | floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+          {% elif user.username == 'vishal' %}
+          <tr class="row_{{ post.id }}" onclick="location.href='{% url 'customer:invoice_detail' 1 %}';">
+            <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">inv_H5ABqNf12alupwXz</code></td>
+            <td class="text-nowrap">Feb 29, 2020</td>
+            <td class="text-right">4,500.00</td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+
+      <div class="row mt-4">
+        <div class="col-12 col-md text-md-right mt-4 my-md-0">
+          <a href="{% url 'customer:cart_new' %}" class="btn btn-block btn-primary text-white py-2">
+            <span>Create New Cart</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+{% endblock rawcontent %}

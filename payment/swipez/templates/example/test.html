@@ -1,0 +1,33 @@
+{% include '_blank.html' %}
+{% load static %}
+
+{% block customstyle %}
+  <style>
+  #testbox {
+      top: 50%;
+      left: 50%;
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      max-width: 320px;
+      margin: auto;
+  }
+  .btn {
+      border-width: 4px;
+      border-radius: 32px;
+  }
+  </style>
+{% endblock %}
+
+{% block rawcontent %}
+  <form action="{% url 'payment_swipez:example_payment' %}" method="post">
+    {% csrf_token %}
+    {% for k, v in payload.items %}
+    <input name="{{ k }}" type="hidden" value="{{ v }}">
+    {% endfor %}
+
+    <div id="testbox">
+      <button type="submit" class="btn btn-block btn-outline-primary font-weight-bold py-3">Test Payment</button>
+    </div>
+  </form>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% for obj in data %}
+<p style="font-size: 1.25rem;"><b>{{ obj.title }}</b></p>
+<p>
+{% for key, val in obj.all_values.items %}
+{{ val.label }}: {{ val.value }}<br>
+{% endfor %}
+</p>
+{% endfor %}

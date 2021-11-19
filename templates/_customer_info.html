@@ -1,0 +1,22 @@
+{% if customer %}
+<p style="font-size: 1.25rem; font-weight: 900;">Customer: {{ customer.primary_contact.email }}</p>
+
+<p>
+Company: {{ customer.name }}<br>
+Primary User: &lt;{{ customer.primary_contact.id }} | {{ customer.primary_contact.email }}&gt;
+Contact: {{ customer.contact_name }}<br>
+{% if customer.phone %}Phone: {{ customer.phone }}<br>{% endif %}
+{% if customer.email %}Email: {{ customer.email }}<br>{% endif %}
+Billing: {{ customer.billing_address }}<br>
+{% if customer.shipping_address != customer.billing_address %}
+Shipping: {{ customer.shipping_address }}<br>
+{% endif %}
+{% if customer.gstin %}GST: {{ customer.gstin }}<br>
+{% elif customer.pan %}PAN: {{ customer.pan }}<br>
+{% endif %}
+</p>
+
+<p><a href="{% url 'admin:billing_customer_change' customer.slug %}">
+  {% url 'admin:billing_customer_change' customer.slug %}
+</a></p>
+{% endif %}

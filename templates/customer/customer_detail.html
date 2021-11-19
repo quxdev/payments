@@ -1,0 +1,131 @@
+{% extends '_customer.html' %}
+
+{% block customstyle %}
+  {{ block.super }}
+<style>
+.table thead {
+  background: rgba(0, 0, 0, 0.20);
+}
+.table tbody {
+  background: white;
+}
+.table tbody tr {
+  cursor: pointer;
+}
+.table th, .table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid rgb(229, 231, 233);
+}
+#invoice {
+  background: white;
+}
+</style>
+{% endblock customstyle %}
+
+{% block h1 %}{{ object.name }}{% endblock %}
+
+{% block pagecontent %}
+{% if not object %}
+  <center><h2>Your KYC is pending</h2></center>
+{% else %}
+{% with custaddr=object.billing_address custuser=object.primary_contact %}
+<div class="container-xl my-4">
+<div id="invoice" class="bg-white px-0 px-sm-4 py-sm-2" style="border-radius: 8px;">
+  <div class="row">
+    {# Invoice Header #}
+    <div class="col-12 col-sm-6 order-sm-last my-2">
+      <div class="row">
+        <div class="col text-sm-right">
+          <div>Company: {{ object.name }}</div>
+          <div>Contact Name: {{ object.contact_name }}</div>
+          <div>Phone: {{ object.phone }}</div>
+          <div>Email: {{ object.email }}</div>
+        </div>
+      </div>
+    </div>
+
+    {# Seller Information #}
+    <div class="col-12 col-sm-6">
+      <div class="row">
+        <div class="col-12 my-2">
+          {% if custuser and custaddr %}
+          <div><b>{{ custuser.first_name }} {{ custuser.last_name }}</b></div>
+          <div>{{ custaddr.address }}</div>
+          <div>
+            {% if custaddr.city %}{{ custaddr.city }} &bullet; {% endif %}
+            {% if custaddr.state %}{{ custaddr.state|upper }} {% endif %}
+            {% if custaddr.pincode %}{{ custaddr.pincode }}{% endif %}
+          </div>
+          {% endif %}
+
+          {% if object.gstin %}
+          <div>GSTIN: <span class="text-muted">{{ object.gstin }}</span></div>
+          <div>{% if object.gstin_verified %}GST is verified{% else %}GST is not verified{% endif %}</div>
+          {% elif object.pan %}
+          <div>PAN: <span class="text-muted">{{ object.pan }}</span></div>
+          <div>{% if object.pan_verified %}PAN is verified{% else %}PAN is not verified{% endif %}</div>
+          {% endif %}
+          <div>Cust No: {{ object.slug }}</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="invoice-items" class="pt-4 mx-sm-n2">
+    <table class="table table-hover table-borderless table-sm">
+      <thead>
+      <tr>
+        <th scope="col" class="">Invoice</th>
+        <th scope="col" class="text-right" style="min-width: 40px;">Date</th>
+        <th scope="col" class="text-right" style="min-width: 40px;">Amount</th>
+        <th scope="col" class="text-right" style="min-width: 40px;">GST</th>
+        <th scope="col" class="text-right" style="min-width: 40px;">Total</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for item in invoices %}
+        <tr class="invoice_row_{{ item.id }}" onclick="location.href='{% url 'customer:invoice_detail' item.slug %}'">
+          <td>{{ item.invoice_number|upper }}</td>
+          <td class="text-nowrap text-right">{{ item.invoice_date }}</td>
+          <td class="text-nowrap text-right">{{ item.amount | floatformat:2 }}</td>
+          <td class="text-nowrap text-right">{{ item.gst | floatformat:2 }}</td>
+          <td class="text-nowrap text-right">{{ item.total_amount | floatformat:2 }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div id="payment-items" class="pt-4 mx-sm-n2">
+    <table class="table table-hover table-borderless table-sm">
+      <thead>
+      <tr>
+        <th scope="col" class="">Payment</th>
+        <th scope="col" class="text-right" style="min-width: 40px;">Date</th>
+        <th scope="col" class="text-right" style="min-width: 40px;">Amount</th>
+        <th scope="col" class="text-right" style="min-width: 40px;">Is Paid</th>
+        <th scope="col" class="text-right" style="min-width: 40px;">Invoice Number</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for item in payments %}
+        <tr class="payment_row_{{ item.id }}" onclick="location.href='{% url 'customer:payment_detail' item.slug %}'">
+          <td>{{ item.slug|upper }}</td>
+          <td class="text-nowrap text-right">{{ item.payment_date }}</td>
+          <td class="text-nowrap text-right">{{ item.paid_amount | floatformat:2 }}</td>
+          <td class="text-nowrap text-right">{{ item.is_processed }}</td>
+          <td class="text-nowrap text-right">{{ item.invoice.invoice_number }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+
+</div>
+</div>
+{% endwith %}
+{% endif %}
+{% endblock pagecontent %}

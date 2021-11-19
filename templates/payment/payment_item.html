@@ -1,0 +1,105 @@
+{% extends 'payment/_payment.html' %}
+
+{% block customstyle %}
+  {{ block.super }}
+<style>
+.table thead {
+}
+.table tbody {
+}
+.table tbody tr {
+  cursor: pointer;
+}
+.table th, .table td {
+  padding: 0.5rem;
+}
+#invoice {
+  background: white;
+  font-size: 0.875rem;
+}
+</style>
+{% endblock customstyle %}
+
+{% block rawcontent %}
+  {{ block.super }}
+
+  <div class="container-md">
+    <div class="form-container py-4 p-md-4">
+      <div class="form_prefix">
+        <span>
+          <a href="#" class="btn p-0"
+             data-toggle="tooltip" data-placement="right" title="Home">
+            <i class="fas fa-2x fa-square"></i>
+          </a>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-md">
+    <div class="form-container p-md-4">
+      <h1 class="py-4">
+        {% block h1 %}{% if object and object.slug %}{{ object.slug }}{% else %}Payment{% endif %}{% endblock %}
+      </h1>
+{% with custaddr=object.customer.billing_address custuser=object.customer.primary_contact %}
+<div class="container-xl my-4">
+<div id="invoice" class="bg-white" style="border-radius: 8px;">
+  <div class="row">
+    {# Invoice Header #}
+    <div class="col-12 col-sm-6 order-last my-2">
+      <div class="row">
+        <div class="col text-sm-right">
+          <div>Payment Date: {{ object.payment_date }}</div>
+          <div>Payment No: {{ object.slug }}</div>
+          <div>Invoice No: {{ object.invoice.invoice_number }}</div>
+          <div>{% if object.is_processed %}Paid{% else %}<span class="text-danger"></span>{% endif %}</div>
+        </div>
+      </div>
+    </div>
+
+    {# Seller Information #}
+    <div class="col-12 col-sm-6">
+      <div class="row">
+        <div class="col-12 my-2">
+          <div>Seller: <b>1E9 Solutions</b></div>
+          <div>Pune &bullet; MH 411007</div>
+          <div>GSTIN: <span class="text-muted">27AACFZ2951K1ZS</span></div>
+        </div>
+        <div class="col-12 my-2">
+          {# DEBUG FOR VISHAL ONLY #}
+          {% if user.username == 'vishal' %}
+          <!-- {{ user }} -->
+          <!-- {{ custuser }} -->
+          <!-- {{ custprofile }} -->
+          {% endif %}
+
+          {% if custuser and profile %}
+          <div>Customer: <b>{{ custuser.first_name }} {{ custuser.last_name }}</b></div>
+          <div>
+            {% if custprofile.city %}{{ custprofile.city }} &bullet; {% endif %}
+            {% if custprofile.state %}{{ custprofile.state|upper }} {% endif %}
+            {% if custprofile.pincode %}{{ custprofile.pincode }}{% endif %}
+          </div>
+          <div>
+          GSTIN: <span class="text-muted">{{ object.customer.gstin }}</span>
+          </div>
+
+          {# DEBUG FOR VISHAL ONLY #}
+          {% elif user.username == 'vishal' %}
+          <div class="text-primary">
+          <div>Customer: <b>Vishal Apte</b></div>
+          <div>Pune &bullet; MH 411007</div>
+          <div>GSTIN: <span class="text-muted">27ABCDE3456F7G8</span></div>
+          </div>
+
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+</div>
+{% endwith %}
+{% endblock rawcontent %}

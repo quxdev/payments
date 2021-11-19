@@ -1,0 +1,36 @@
+{% extends 'forms/_form.html' %}
+{% load static %}
+
+{% block form_title %}Payment.{% endblock form_title %}
+
+{% block form_body %}
+{% if response %}
+    <form action="{{action_url}}" method="POST">
+    <script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        data-key={{key}}
+        data-amount={{response.amount}}
+        data-currency={{response.currency}}
+        data-order_id={{response.id}}
+        data-buttontext="Pay with Razorpay"
+        data-name="BlackLab"
+        data-description=""
+        data-image="{% static 'logo/v1/blacklab_4x1.svg' %}"
+        data-prefill.name={{request.user.username}}
+        data-prefill.email={{request.user.email}}
+        data-theme.color="#F37254"
+    ></script>
+    <input type="hidden" custom="Hidden Element" name="hidden">
+    </form>
+{% endif %}
+{% endblock %}
+
+
+{% block customjs %}
+{{ block.super }}
+  <script>
+    $(window).on('load', function() {
+     jQuery('.razorpay-payment-button').click();
+    });
+  </script>
+{% endblock %}

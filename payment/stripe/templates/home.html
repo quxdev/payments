@@ -1,0 +1,19 @@
+{% load static %} <!-- new -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Django + Stripe Checkout</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="{% static 'js/payments/stripe.js' %}"></script>   <!-- new -->
+  </head>
+  <body>
+  <section class="section">
+    <div class="container">
+      <button class="button is-primary" id="submitBtn">Purchase!</button>
+    </div>
+  </section>
+  </body>
+</html>

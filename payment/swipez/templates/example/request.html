@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+<body onload="document.paymentform.submit()">
+  <form action="{{ url }}" name="paymentform" method="post">
+    {% csrf_token %}
+    {% for k, v in payload.items %}
+    <input name="{{ k }}" type="hidden" value="{{ v }}">
+    {% endfor %}
+  </form>
+</body>
+</html>

@@ -1,0 +1,195 @@
+{% extends '_form.html' %}
+{% load static %}
+{% load xcv_forms %}
+
+{% block stylesheets %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/select2/select2.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/qux-select2.css' %}">
+{% endblock stylesheets %}
+
+{% block customstyle %}
+{{ block.super }}
+<style>
+  .add-row {
+    color: green;
+    background-color: transparent;
+    text-decoration: underline;
+  }
+  .delete-row {
+    color: red;
+    background-color: transparent;
+    text-decoration: underline;
+  }
+</style>
+{% endblock customstyle %}
+
+{% block form_title %}{{ form_title }}{% endblock %}
+
+{% block form_body %}
+{% if messages %}
+    <div class="row">
+      <div class="col">
+        {% for m in messages %}
+          <p class="lead">{{ m }}</p>
+        {% endfor %}
+      </div>
+    </div>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+
+    {% include 'includes/_hfields.html' %}
+
+    <br>
+    <legend>IVR / Products</legend>
+    <table class="table">
+        {{ items.management_form }}
+
+        {% for form in items.forms %}
+
+            {% if forloop.first %}
+                <thead>
+                <tr>
+                    {% for field in form.visible_fields %}
+                        <th>{{ field.label|capfirst }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+            {% endif %}
+            <tr class="{% cycle 'row1' 'row2' %} formset_row-{{ items.prefix }}">
+                {% for field in form.visible_fields %}
+                    <td>
+                        {# Include the hidden fields in the form #}
+                        {% if forloop.first %}
+                            {% for hidden in form.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
+                        {% endif %}
+                        {{ field.errors.as_ul }}
+                        {{ field }}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+
+    <div class="row mt-4">
+    <div class="col">
+      <button type="submit" class="btn btn-primary btn-block py-2">
+        {% if submit_btn_text %}
+           {{ submit_btn_text }}
+        {% else %}
+           Submit
+        {% endif %}
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock form_body %}
+
+
+{% block javascript %}
+{{ block.super }}
+<script src="{% static 'js/jquery.formset.js' %}"></script>
+<script src="{% static 'js/select2/select2.min.js' %}"></script>
+{% endblock %}
+
+{% block customjs %}
+<script type="text/javascript">
+    function change_ivr_list(customer, last=false){
+        let url = "/customer/ivr-by-customer/" + customer + "/";
+        $.ajax({
+          url: url,
+          type: 'get',
+          success:function(data) {
+            // ^= start with and $= end with
+            var $el = $( "select[name^='items-'][name$='-ivr']" );
+            if (last == true){
+                $el = $el.last();
+            }
+            $el.empty(); // remove old options
+
+            var values = data.data;
+            values.forEach((item) => {
+                $el.append($("<option></option>").attr("value", item.id).text(item.ivr));
+            });
+
+          }
+        });
+    }
+
+    $(document).ready(function () {
+        // $('#id_customer').select2(); // without ajax
+
+        $('#id_customer').select2({
+            ajax: {
+                url: '{% url 'customer:customer-autocomplete' %}',
+                dataType: 'json',
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {id: item.id, text: item.name};
+                        })
+                    };
+                }
+            },
+            minimumInputLength: 1
+        });
+    });
+
+    $('document').ready(function () {
+        $('.formset_row-{{ items.prefix }}').formset({
+            addText: 'Add',
+            deleteText: 'Remove',
+            prefix: '{{ items.prefix }}'
+        });
+
+        var customer = $('#id_customer').val();
+        if (customer){
+            change_ivr_list(customer);
+        }
+
+        $('.add-row').click(function () {
+            var customer = $('#id_customer').val();
+            if (customer){
+                change_ivr_list(customer, true);
+            }
+        });
+
+    });
+
+    $('#id_customer').change(function () {
+        var customer = this.value;
+        change_ivr_list(customer);
+    });
+
+    // $('#id_customer').on("select2:select", function(e) {
+    //     var customer = $('#id_customer').val();
+    //     if (customer){
+    //         change_ivr_list(customer);
+    //     }
+    // });
+
+    // change product and set amount and gst
+    $("select[name^='items-'][name$='-product']").change(function () {
+        var product = this.value;
+        let amt_tg = $(this).closest("tr").find("input[name^='items-'][name$='-amount']");
+        let gst_tg = $(this).closest("tr").find("input[name^='items-'][name$='-gst']");
+
+        let url = "/customer/product-by-id/" + product + "/";
+        $.ajax({
+          url: url,
+          type: 'get',
+          success:function(data) {
+              amt_tg.val(data.amount);
+              gst_tg.val(data.gst);
+          }
+        });
+
+    });
+
+</script>
+{% endblock %}

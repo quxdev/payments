@@ -1,0 +1,113 @@
+{% extends 'app/_app_form.html' %}
+{% load static %}
+
+{% block stylesheets %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock stylesheets %}
+
+{% block form_title %}KYC{% endblock %}
+
+{% block form_body %}
+{% if slug %}
+<div class="form-group row">
+  <div class="col-12 col-sm-4 col-form-label">Cust No</div>
+  <div class="col-12 col-sm-4 align-self-center">
+    {{ slug }}
+  </div>
+</div>
+{% endif %}
+
+<div class="form-group row">
+  <div class="col-12 col-sm-4 col-form-label">Name</div>
+  <div class="col-12 col-sm-4 align-self-center">
+    {{ first_name }} {{ last_name }}
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+  {% include 'includes/_hfields.html' %}
+
+  <div class="row mt-4">
+    <div class="col-12 offset-sm-4 col-sm-8">
+      <button type="submit" class="btn btn-primary btn-block">
+        {% if submit_btn_text %}
+          {{ submit_btn_text }}
+        {% else %}
+          Submit
+        {% endif %}
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock form_body %}
+
+{% block javascript %}
+  {{ block.super }}
+  <script type="text/javascript">
+
+  function toggleShowingShippingAddress(val) {
+    let adds = [
+      "#id_shipping_address",
+      "#id_shipping_city",
+      "#id_shipping_state",
+      "#id_shipping_pincode",
+      "#id_shipping_country",
+    ];
+    if (val) {
+      // $('#id_shipping_address').val($('#id_billing_address').val());
+      for (let i = 0; i < adds.length; i++) {
+        let item = $(adds[i]);
+        item.parent().parent().hide();
+        item.prop('required', false);
+      }
+    } else {
+      for (let i = 0; i < adds.length; i++) {
+        let item = $(adds[i])
+        item.parent().parent().show();
+        item.prop('required', true);
+      }
+    }
+  }
+
+  $('#id_same_as_billing_address').change(function () {
+    toggleShowingShippingAddress(this.checked);
+  });
+
+  function toggle(val, id) {
+    let widget = $('#' + id);
+    if (val === '' || val === undefined) {
+      widget.prop('readonly', false);
+    } else {
+      widget.prop('readonly', true);
+    }
+  }
+
+  $('#id_gstin').change(function () {
+    if (this.value.length === 15) {
+      let pan = this.value.substring(2, 12);
+      $('#id_pan').val(pan);
+    }
+    toggle(this.value, 'id_pan');
+  });
+
+  $('#id_pan').change(function () {
+    toggle(this.value, 'id_gstin');
+  });
+
+  $(document).ready(function () {
+    let isSame = $('#id_same_as_billing_address').prop('checked');
+    toggleShowingShippingAddress(isSame);
+
+    let panError = '{{form.pan.errors}}';
+    if (panError === '') {
+      let gstin = $('#id_gstin').val();
+      let pan = $('#id_pan').val();
+      toggle(gstin, 'id_pan');
+      toggle(pan, 'id_gstin');
+    }
+
+  });
+  </script>
+{% endblock %}

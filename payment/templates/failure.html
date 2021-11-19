@@ -1,0 +1,27 @@
+{% extends '_blank.html' %}
+
+{% block rawcontent %}
+  <div class="container py-4" style="max-width: 640px">
+  <div class="row no-gutters my-3">
+    <div class="col-12 bg-light my-1 p-2">Reference: {{ reference }}</div>
+    <div class="col-12 bg-light my-1 p-2">Error: {{ error }}</div>
+    <div class="col-12 bg-light my-1 p-2">Message: {{ message }}</div>
+  </div>
+  {% if payment %}
+  <table class="table table-borderless table-striped table-hover table-sm">
+  {% for k, v in payment.items %}
+  <tr>
+    <td class="px-2">{{ k|upper }}</td>
+    <td class="px-2">
+    {% if k|upper == 'INVOICE' %}
+      <a href="{% url 'customer:invoice_detail' slug %}"><i class="fas fa-paperclip"></i> {{ v }}</a>
+    {% else %}
+      {{ v }}
+    {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+  </table>
+  {% endif %}
+  </div>
+{% endblock %}

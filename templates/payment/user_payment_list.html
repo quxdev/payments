@@ -1,0 +1,87 @@
+{% extends 'payment/_payment.html' %}
+{% load static %}
+
+{% block h1 %}Payments{% endblock %}
+
+{% block pagecontent %}
+  <div class="container-xl my-4">
+    <div id="invoice_list" class="">
+      <table class="table table-hover table-borderless table-sm">
+        <thead>
+          <tr>
+            {% if admin_mode %}
+            <th scope="col" class="">Customer</th>
+            {% endif %}
+            <th scope="col" class="d-none d-sm-table-cell">Invoice No</th>
+            <th scope="col" class="">Payment Date</th>
+            <th scope="col" class="">Mode</th>
+            <th scope="col" class="">Source</th>
+            <th scope="col" class="text-right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if object_list %}
+          {% for post in object_list %}
+          <tr class="row_{{ post.id }}" onclick="location.href='{% url 'customer:payment_detail' post.slug %}'">
+            {% if admin_mode %}
+            <td data-th="Customer">{{ post.invoice.customer }}</td>
+            {% endif %}
+
+            <td data-th="Invoice" class="text-nowrap d-none d-sm-table-cell">
+              {{ post.invoice.invoice_number }}
+              <span>
+                {% if post.is_processed %}
+                  <span class="ml-2 badge badge-primary">PAID</span>
+                {% else %}
+                  <span class="ml-2 badge badge-danger">FAILED</span>
+                {% endif %}
+              </span>
+            </td>
+            <td data-th="Payment Date" class="text-nowrap">{{ post.payment_date }}</td>
+            <td data-th="Payment Mode" class="">{{ post.payment_mode }}</td>
+            <td data-th="Payment Source" class="">{{ post.payment_source }}</td>
+            <td data-th="Amount" class="text-right">
+              {% if post.is_processed %}
+                <span>{{ post.paid_amount | floatformat:2 }}</span>
+              {% else %}
+                <span class="text-danger">{{ post.paid_amount | floatformat:2 }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+          {% elif user.username == 'vishal' %}
+          <tr class="row_{{ post.id }}" onclick="location.href='{% url 'customer:payment_detail' 1 %}';">
+            <td data-th="Invoice" class="text-nowrap d-none d-sm-table-cell">
+              inv_H5ABqNf12alupwXz
+              <span>
+                <span class="ml-2 badge badge-primary font-weight-normal">PAID</span>
+              </span>
+            </td>
+            <td data-th="Payment Date" class="text-nowrap">Feb 29, 2020
+            </td>
+            <td data-th="Payment Mode" class="">Credit Card</td>
+            <td data-th="Payment Source" class="">Razorpay</td>
+            <td data-th="Amount" class="text-right">
+              <span>1,180.00</span>
+            </td>
+          </tr>
+          <tr class="row_{{ post.id }}" onclick="location.href='{% url 'customer:payment_detail' 1 %}';">
+            <td data-th="" class="text-nowrap d-none d-sm-table-cell">
+              inv_H5ABqNf12alupwXz
+              <span>
+                <span class="ml-2 badge badge-danger font-weight-normal">FAILED</span>
+              </span>
+            </td>
+            <td data-th="" class="text-nowrap">Feb 29, 2020</td>
+            <td data-th="Payment Mode" class="">Credit Card</td>
+            <td data-th="Payment Source" class="">Razorpay</td>
+            <td data-th="Amount" class="text-right">
+              <span class="text-danger">590.00</span>
+            </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock pagecontent %}

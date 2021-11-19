@@ -1,0 +1,124 @@
+{% extends '_blank.html' %}
+
+{% block rawcontent %}
+  <div class="mx-auto px-2" style="width: 100%; max-width: 640px;">
+    <p class="lead text-uppercase font-weight-light my-3">Swipez Payment Integration Page - Version 1</p>
+
+    <div>
+    <form id="redirectForm" method="post" action="{% url 'payment_swipez:payment' %}">
+      {% csrf_token %}
+      <div class="row form-group align-items-center">
+        <div class="col">
+          <b>Account Details</b>
+        </div>
+      </div>
+
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="account_id">Account ID</label></div>
+        <div class="col-12 col-md-8"><input id="account_id" name="account_id" type="text" class="form-control"></div>
+      </div>
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="return_url">Return URL</label></div>
+        <div class="col-12 col-md-8"><input id="return_url" name="return_url" type="text" class="form-control col-12"></div>
+      </div>
+
+      <div class="row form-group align-items-center">
+        <div class="col">
+          <b>Transaction Details</b>
+        </div>
+      </div>
+
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="reference_no">Reference No.</label></div>
+        <div class="col-12 col-md-8"><input id="reference_no" name="reference_no" type="text" class="form-control"></div>
+      </div>
+
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="amount">Sale Amount</label></div>
+        <div class="col-12 col-md-8"><input id="amount" name="amount" type="text" class="form-control"></div>
+      </div>
+
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="description">Description</label></div>
+        <div class="col-12 col-md-8"><input id="description" name="description" type="text" class="form-control"></div>
+      </div>
+
+      <div class="row form-group align-items-center">
+        <div class="col">
+          <b>Billing Address</b>
+        </div>
+      </div>
+
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="name">Name</label></div>
+        <div class="col-12 col-md-8"><input id="name" name="name" type="text" class="form-control"></div>
+      </div>
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="address">Address</label></div>
+        <div class="col-12 col-md-8"><input id="address" name="address" type="text" class="form-control"></div>
+      </div>
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="city">City</label></div>
+        <div class="col-12 col-md-8"><input id="city" name="city" type="text" class="form-control"></div>
+      </div>
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="state">State/Province</label></div>
+        <div class="col-12 col-md-8"><input id="state" name="state" type="text" class="form-control"></div>
+      </div>
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="postal_code">ZIP/Postal Code</label></div>
+        <div class="col-12 col-md-8"><input id="postal_code" name="postal_code" type="text" class="form-control"></div>
+      </div>
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="email">Email</label></div>
+        <div class="col-12 col-md-8"><input id="email" name="email" type="text" class="form-control"></div>
+      </div>
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="phone">Mobile</label></div>
+        <div class="col-12 col-md-8"><input id="phone" name="phone" type="text" class="form-control"></div>
+      </div>
+
+      <div class="row form-group align-items-center">
+        <div class="col">
+          <b>User Defined Fields</b>
+        </div>
+      </div>
+
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="udf1">User Defined Field 1</label></div>
+        <div class="col-12 col-md-8"><input id="udf1" name="udf1" type="text" class="form-control"></div>
+      </div>
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="udf2">User Defined Field 2</label></div>
+        <div class="col-12 col-md-8"><input id="udf2" name="udf2" type="text" class="form-control"></div>
+      </div>
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="udf3">User Defined Field 3</label></div>
+        <div class="col-12 col-md-8"><input id="udf3" name="udf3" type="text" class="form-control"></div>
+      </div>
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="udf4">User Defined Field 4</label></div>
+        <div class="col-12 col-md-8"><input id="udf4" name="udf4" type="text" class="form-control"></div>
+      </div>
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-4"><label for="udf5">User Defined Field 5</label></div>
+        <div class="col-12 col-md-8"><input id="udf5" name="udf5" type="text" class="form-control"></div>
+      </div>
+
+
+      <div class="row form-group align-items-center">
+        <div class="col-12 col-md-6">
+          <button name="submit" type="submit" class="form-control btn btn-block btn-outline-success">
+            Submit
+          </button>
+        </div>
+        <div class="col-12 col-md-6">
+          <button name="reset" type="reset" class="form-control btn btn-block btn-outline-danger">
+            Reset
+          </button>
+        </div>
+      </div>
+    </form>
+    </div>
+  </div>
+{% endblock %}

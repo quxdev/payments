@@ -1,0 +1,361 @@
+{% extends 'forms/_form.html' %}
+{% load static qux quxform %}
+
+{% block stylesheets %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/select2/select2.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/qux-select2.css' %}">
+{% endblock stylesheets %}
+
+{% block customstyle %}
+{{ block.super }}
+<style>
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+  .qux-content {
+      background-color: rgb(239, 241, 245);
+  }
+  .plan_selected {
+    background:#00ffb6;
+    border:1px solid #00ffb6;
+  }
+  .plan_selected .list-group-item {
+    background:#00ffb6 !important
+  }
+  .card:hover .btn-outline-dark {
+    color:white;
+    background:#212529;
+  }
+  .card {
+      border-radius: 8px;
+      border: 0;
+  }
+  .card-body {
+      padding: 1rem;
+      border: none;
+  }
+  .card-extra .card-body {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+  .card-extra .card-title {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  .table {
+    font-size: 0.875rem;
+  }
+  .table thead th {
+    border-top: 0;
+    border-bottom: 0;
+  }
+  .table-extra tr {
+      padding: 0 0.25rem;
+      margin-top: 0;
+  }
+  .table-extra td, .table-extra th {
+      padding: 0.125rem;
+  }
+  .choose_plan div{
+    cursor: pointer;
+  }
+  .cursor-pointer {
+    cursor: pointer;
+    padding: 0.25rem;
+  }
+  .fa-minus.cursor-pointer:hover {
+    background-color: #ff253a;
+    color: #ffffff;
+    border-radius: 50%;
+  }
+  .fa-plus.cursor-pointer:hover {
+    background-color: #28a745;
+    color: #ffffff;
+    border-radius: 50%;
+  }
+  .quantity, .currency {
+    text-align: right;
+  }
+  .disabled-effect {
+    pointer-events: none;
+    opacity: 0.4;
+}
+</style>
+{% endblock customstyle %}
+
+{% comment %}
+{% block form_title %}{{ form_title }}{% endblock %}
+{% endcomment %}
+
+{% block form_body %}
+
+{% if messages %}
+  <div class="row">
+    <div class="col">
+      {% for m in messages %}
+        <p class="lead">{{ m }}</p>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+<form method="post" id="form">
+{% csrf_token %}
+  <h3>Step 1: Choose your plan</h3>
+
+  <div class="row choose_plan">
+    {% for plan in products.plan %}
+    <div class="col-lg-4 col-md-12 my-2 {% if plan.id in disabled_plan_products %}disabled-effect{% endif %}">
+      <div class="card h-100 plan_{{ plan.id }}"
+           onclick="plan_click({{ plan.id }})"
+           data-id="{{ plan.id }}"
+           data-description="{{ plan.description }}"
+           data-amount="{{ plan.amount }}"
+           data-minutes="{{ plan.minutes_included }}"
+           data-agents="{{ plan.agents_included }}"
+           data-call_recording="{{ plan.call_recording_included }}">
+
+        <div class="card-body">
+          <div class="card-title">{{ plan.description }}</div>
+          <span class="font-weight-bold">₹{{ plan.amount|qux_floatformat_in:0 }}</span> per
+          {% if plan.monthly_validity == 12 %}year
+          {% elif plan.monthly_validity == 1 %}month
+          {% else %}{{ plan.monthly_validity }}month
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Extras -->
+  <h3>Step 2: Extras</h3>
+
+  <div class="row">
+    <div class="col-lg-4 col-md-12 my-2">
+      <div class="card card-extra h-100">
+        <div class="card-body">
+          <div class="card-title">
+            Users
+            <span class='float-right text-muted'>₹{{ products.agent.amount|qux_floatformat_in:0 }} per year</span>
+          </div>
+          <div class="agent_{{ products.agent.id }}"
+               data-id="{{ products.agent.id }}"
+               data-agents="{{ products.agent.agents_included }}"
+               data-amount="{{ products.agent.amount }}">
+            <table class="table table-sm table-borderless table-extra py-0 my-0 w-100">
+              <tbody>
+              <tr class="d-flex">
+                <td class="text-left" style="width: 24px;"
+                    onclick="agent_click({{ products.agent.id }}, 'add')">
+                  <i class="fas fa-plus cursor-pointer"></i>
+                </td>
+                <td class="px-2" style="width: 100%;">Users</td>
+                <td class="text-right" style="width: 24px;"
+                    onclick="agent_click({{ products.agent.id }}, 'remove')">
+                    <i class="fas fa-minus cursor-pointer"></i>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4 col-md-12 my-2">
+      <div class="card card-extra h-100">
+        <div class="card-body">
+          <div class="card-title">
+            Features
+            <span class='float-right text-muted'>₹{{ products.recording.amount|qux_floatformat_in:0 }} per year</span>
+          </div>
+          <div class="recording_{{ products.recording.id }}"
+               data-id="{{ products.recording.id }}"
+               data-call_recording="{{ products.recording.call_recording_included }}"
+               data-amount="{{ products.recording.amount }}">
+            <table class="table table-sm table-borderless table-extra py-0 my-0 w-100">
+              <tbody>
+              <tr class="d-flex">
+                <td class="text-left" style="width: 24px;"
+                    onclick="recording_click({{ products.recording.id }}, 'add')">
+                    <i class="fas fa-plus cursor-pointer"></i>
+                </td>
+                <td class="px-2" style="width: 100%;">Recording</td>
+                <td class="text-right" style="width: 24px;"
+                    onclick="recording_click({{ products.recording.id }}, 'remove')">
+                    <i class="fas fa-minus cursor-pointer"></i>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4 col-md-12 my-2">
+      <div class="card card-extra h-100">
+        <div class="card-body">
+          <div class="card-title">Minutes</div>
+
+          <table class="table table-sm table-borderless table-extra py-0 my-0 w-100">
+            <tbody>
+            {% for minute in products.minutes %}
+            <tr id="" class="d-flex minute_{{ minute.id }}"
+                 data-id="{{ minute.id }}"
+                 data-minutes="{{ minute.minutes_included }}"
+                 data-amount="{{ minute.amount }}">
+              <td class="text-left" style="width: 24px;"
+                  onclick="minutes_click({{ minute.id }}, 'add')">
+                <i class="fas fa-plus cursor-pointer"></i>
+              </td>
+              <td class="text-right" style="width: 100%;">{{ minute.minutes_included|qux_floatformat_in:0 }}</td>
+              <td class>@</td>
+              <td class="text-left" style="width: 100%;">₹{{ minute.amount|qux_floatformat_in:0 }}</td>
+              <td class="text-right" style="width: 24px;"
+                  onclick="minutes_click({{ minute.id }}, 'remove')">
+                <i class="fas fa-minus cursor-pointer"></i>
+              </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Step 3: Checkout and Make Payment</h3>
+
+  <div class="my-3">
+    <table class="table table-sm checkout_table" style="table-layout: fixed;">
+      <thead class="thead-light">
+      <tr>
+        <th scope="col">Item</th>
+        <th scope="col" class="text-right">Included</th>
+        <th scope="col" class="text-right">Added</th>
+        <th scope="col" class="text-right">Bonus</th>
+        <th scope="col" class="text-right">Total</th>
+        <th scope="col" class="text-right">Amount</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr class='for_plan'>
+        <td>Plan</td>
+        <td class='item_included quantity'>-</td>
+        <td class='item_added quantity'>-</td>
+        <td class='item_bonus quantity'>-</td>
+        <td class='item_total quantity'>-</td>
+        <td class='item_amount currency'>-</td>
+      </tr>
+      <tr class='for_agent'>
+        <td>Agents</td>
+        <td class='item_included quantity'>-</td>
+        <td class='item_added quantity'>-</td>
+        <td class='item_bonus quantity'>-</td>
+        <td class='item_total quantity'>-</td>
+        <td class='item_amount currency'>-</td>
+      </tr>
+      <tr class='for_minute'>
+        <td>Minutes</td>
+        <td class='item_included quantity'>-</td>
+        <td class="item_added quantity">-</td>
+        <td class='item_bonus quantity'>-</td>
+        <td class='item_total quantity'>-</td>
+        <td class='item_amount currency'>-</td>
+      </tr>
+      <tr class='for_recording'>
+        <td>Recording</td>
+        <td class='item_included quantity'>False</td>
+        <td class='item_added quantity'>False</td>
+        <td class='item_bonus quantity'>False</td>
+        <td class='item_total quantity'>False</td>
+        <td class='item_amount currency'>-</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="row my-1">
+      <div class="col-6 offset-md-7 col-md-3">Total</div>
+      <div class="col-6 col-md-2 currency">
+        <span id="total" class="total currency_sum" style="padding-right: 0.3em;">-</span>
+      </div>
+    </div>
+
+    <div class="row my-1">
+      <div class="col-6 offset-md-7 col-md-3">GST (18%)</div>
+      <div class="col-6 col-md-2 currency">
+        <span id="gst" class="gst currency_sum" style="padding-right: 0.3em;">-</span>
+      </div>
+    </div>
+
+    <div class="row my-1">
+      <div class="col-6 offset-md-7 col-md-3">Balance Due</div>
+      <div class="col-6 col-md-2 currency">
+        <span id="balance_due" class="balance_due currency_sum" style="padding-right: 0.3em;">-</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12 col-md-6">
+      <button type="submit" class="btn btn-primary btn-block py-2" name="submit" value="submit">
+        {% if submit_btn_text %}
+          {{ submit_btn_text }}
+        {% else %}
+          Submit
+        {% endif %}
+      </button>
+    </div>
+
+    <div class="col-12 col-md-6 my-4 my-md-0">
+      <button type="submit" class="btn btn-primary btn-block py-2" name="submit" value="payment">
+        Save + Pay
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock form_body %}
+
+
+{% block javascript %}
+{{ block.super }}
+<script src="{% static 'js/jquery.formset.js' %}"></script>
+<script src="{% static 'js/select2/select2.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/cart.js' %}"></script>
+{% endblock %}
+
+{% block customjs %}
+<script type="text/javascript">
+
+let has_existing_paid_ivr = {{ has_existing_paid_ivr|yesno:"true,false" }};
+let disabled_plan_products = {{ disabled_plan_products|safe }};
+
+let minute_json = [];
+
+{% for minute in products.minutes %}
+  minute_json.push({
+    'id':{{ minute.id|safe }},
+    'amount':{{ minute.amount|safe }},
+    'minutes':{{ minute.minutes_included|safe }}
+  });
+{% endfor %}
+
+let cart_initial = {{ initial|safe }};
+cart_initial = cart_initial ? cart_initial : null;
+
+let qty, fn;
+for (let cat in cart_initial) {
+  for (let id in cart_initial[cat]) {
+    qty = cart_initial[cat][id];
+    fn = window[cat + '_click'];
+    fn(id, 'add', qty);
+  }
+}
+
+</script>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends '_form.html' %}
+{% load static %}
+
+{% block form_title %}Import customer/invoice csv file.{% endblock %}
+
+{% block form_body %}
+    <form id="form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row form-row">
+      <div class="col-12 mb-4">
+        <label class="form-label">Address/Customer/Contact CSV File <span style="color: red;">*</span></label>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text foo-border">
+              <i class="fas fa-fw fa-file"></i>
+            </span>
+          </div>
+          <div class="custom-file">
+            <input type="file"
+                   class="custom-file-input"
+                   name="contactfile"
+                   id="contacts-input-file">
+            <label class="custom-file-label" for="contacts-input-file">File</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row form-row">
+      <div class="col-12 mb-4">
+        <label class="form-label">Invoice CSV File <span style="color: red;">*</span></label>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text foo-border">
+              <i class="fas fa-fw fa-file"></i>
+            </span>
+          </div>
+          <div class="custom-file">
+            <input type="file"
+                   class="custom-file-input"
+                   name="invoicefile"
+                   id="contacts-input-file">
+            <label class="custom-file-label" for="contacts-input-file">File</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col">
+        <button class="btn btn-primary btn-block py-2" type="submit">Import</button>
+      </div>
+    </div>
+  </form>
+  {% endblock %}
+
+{% block form_belowthefold %}
+<div id="results" class="container-md xcv-mt-5 d-none">
+  <div class="form-container p-md-4 shadow">
+    <div><p class="pb-2">CSV file uploaded successfully.</p></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block customjs %}
+{{ block.super }}
+<script>
+  $("#form").submit(function (e) {
+    $("#spinner").html('<i class="fas fa-spinner fa-spin"></i>');
+    $("#loading").removeClass("d-none")
+
+    e.preventDefault();
+
+    let csrftoken = $("input[name=csrfmiddlewaretoken]").val();
+
+    function csrfSafeMethod(method) {
+      // these HTTP methods do not require CSRF protection
+      return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $.ajaxSetup({
+      beforeSend: function (xhr, settings) {
+        // if not safe, set csrftoken
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+          xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+      },
+    });
+
+    let formData = new FormData(this);
+    $.ajax({
+      method: "POST",
+      url: "{% url 'customer:invoice_import' %}?format=json",
+      data: formData,
+      dataType: 'json',
+      processData: false,
+      cache: false,
+      contentType: false,
+      success: function(data) {
+        post_success(data);
+      },
+      error: function(data) {
+        post_failure(data);
+      },
+      complete: function() {
+        $("#spinner").html();
+        $("#loading").addClass("d-none");
+      }
+    });
+  });
+
+  function post_success(data) {
+    console.log(data);
+    $("#results").removeClass("d-none");
+  }
+
+  function post_failure(data) {
+    console.log(data);
+  }
+
+  $(document).ready(function () {
+  $('.custom-file input').change(function (e) {
+    $(this).next('.custom-file-label').html(e.target.files[0].name);
+  });
+});
+</script>
+{% endblock %}
