@@ -16,13 +16,6 @@ from django.views.generic import UpdateView
 from rest_framework import permissions
 from rest_framework.views import APIView
 
-# from apps.crm.models import CRMUser
-# from apps.ivr.models import IVRUser
-# from apps.ivr.tasks import create_subscription_cart
-# from core.mixin import DjangoViewTrackingMixin
-# from core.models import Address
-# from core.models import Profile
-# from core.util.file import csv_to_json
 from .forms import *
 from qux.seo.mixin import SEOMixin
 from .models import *
@@ -84,9 +77,9 @@ class CustomerDetailView(LoginRequiredMixin, DetailView):
     def get_object(self):
         user = self.request.user
         if not user.is_staff and not user.is_superuser:
-            customer = Customer.objects.filter(
+            customer = Customer.objects.get_or_none(
                 primary_contact=user
-            ).last()
+            )
         else:
             if 'pk' not in self.kwargs:
                 raise Http404('URL is not valid')
@@ -107,6 +100,12 @@ class CustomerDetailView(LoginRequiredMixin, DetailView):
 class InvoiceDetailView(LoginRequiredMixin, DetailView):
     model = Invoice
     template_name = 'invoice/invoice_item.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['invoice_seller'] = settings.INVOICE_SELLER
+
+        return context
 
     def get_object(self):
         user = self.request.user
@@ -345,7 +344,7 @@ class PaymentUpdateView(LoginRequiredMixin, PermissionRequiredMixin, TemplateVie
     permission_required = ('customer.change_payment', )
 
     def get(self, request, slug, *args, **kwargs):
-        payment = Payment.objects.filter(slug=slug).last()
+        payment = Payment.objects.get_or_none(slug=slug)
         if not payment or not payment.invoice.cart:
             raise Http404('Cart is not exists')
 
@@ -363,7 +362,7 @@ class PaymentUpdateView(LoginRequiredMixin, PermissionRequiredMixin, TemplateVie
         return render(request, self.template_name, context=context_dict)
 
     def post(self, request, slug, *args, **kwargs):
-        payment = Payment.objects.filter(slug=slug).last()
+        payment = Payment.objects.get_or_none(slug=slug)
         if not payment:
             raise Http404('Cart is not exists')
 
@@ -445,24 +444,6 @@ def getinvoice_by_customer(request, customer_id: int):
 
 
 @login_required
-def getivr_by_customer(request, customer_id: int):
-    if not request.user.is_superuser:
-        return
-
-    invoices_data = []
-
-    customer = Customer.objects.filter(id=customer_id).last()
-    if customer:
-        ivrids = IVRUser.objects.filter(
-            user=customer.primary_contact).values_list('ivr', flat=True).distinct()
-        ivrs = IVRConfig.objects.filter(id__in=ivrids).order_by('-id')
-
-        invoices_data = [{'id': i.id, 'ivr': i.__str__()} for i in ivrs]
-
-    return JsonResponse({'data': invoices_data})
-
-
-@login_required
 def getopen_cart_by_customer(request, customer_id: int):
     if not request.user.is_superuser:
         return
@@ -529,172 +510,6 @@ def cart_validation(request, ivrid: int):
     return JsonResponse(json_data)
 
 
-class CustomerInvoicePaymentImportView(LoginRequiredMixin, APIView):
-    permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser,)
-
-    # parser_classes = (MultiPartParser, )
-
-    @staticmethod
-    def get(request):
-        return render(request, 'import.html', None)
-
-    def post(self, request):
-        """
-        valid url /customer/invoice/import/
-        """
-        contactfile = request.FILES.get('contactfile', None)
-        invoicefile = request.FILES.get('invoicefile', None)
-
-        contact_json = csv_to_json(contactfile)
-        for fields in contact_json:
-            self.create_address_customer(fields)
-
-        invoice_json = csv_to_json(invoicefile)
-        for fields in invoice_json:
-            self.create_invoice_payment(fields)
-
-        return JsonResponse({'message': 'CSV file uploaded successfully.'})
-
-    def create_address_customer(self, fields):
-        raw_data = dict(fields)
-        # replace blank '' value to None
-        raw_data = {k: None if v == '' else v for k, v in raw_data.items()}
-
-        email_id = raw_data.get('EmailID', None)
-        phone_no = raw_data.get('MobilePhone', None)
-        phone_no = phone_number(phone_no)
-
-        user = User.objects.filter(email=email_id).last()
-        if not user:
-            profile = Profile.objects.filter(phone=phone_no).last()
-            if profile:
-                user = profile.user
-
-        if not user:
-            print('User is not found')
-            return
-        print('user =', user.id)
-
-        billing_address = shipping_address = None
-
-        json_data = dict(
-            address=raw_data.get('Billing Address', None),
-            city=raw_data.get('Billing City', None),
-            state=raw_data.get('Billing State', None),
-            country=raw_data.get('Billing Country', None),
-            pincode=raw_data.get('Billing Code', None),
-        )
-
-        has_value = list(json_data.values())
-        has_value = list(filter(lambda a: a != None, has_value))  # remove blank values
-
-        if has_value:
-            billing_address, created = Address.objects.get_or_create(
-                user=user,
-                **json_data
-            )
-
-        json_data = dict(
-            address=raw_data.get('Shipping Address', None),
-            city=raw_data.get('Shipping City', None),
-            state=raw_data.get('Shipping State', None),
-            country=raw_data.get('Shipping Country', None),
-            pincode=raw_data.get('Shipping Code', None),
-        )
-
-        has_value = list(json_data.values())
-        has_value = list(filter(lambda a: a != None, has_value))  # remove blank values
-
-        if has_value:
-            shipping_address, created = Address.objects.get_or_create(
-                user=user,
-                **json_data
-            )
-
-        customer_obj = Customer.objects.filter(primary_contact=user).last()
-        if not customer_obj:
-            customer_obj, created = Customer.objects.get_or_create(
-                primary_contact=user,
-            )
-        json_data = dict(
-            email=email_id,
-            phone=phone_no if phone_no else user.profile.phone,
-            name=raw_data.get('Company Name', None),
-            gstin=raw_data.get('GST Identification Number (GSTIN)', None),
-            pan=raw_data.get('PAN Number', None),
-            billing_address=billing_address,
-            shipping_address=shipping_address,
-            website=raw_data.get('Website', None),
-        )
-        for key, value in json_data.items():
-            setattr(customer_obj, key, value)
-        customer_obj.users.add(user)
-        customer_obj.save()
-
-    def create_invoice_payment(self, fields):
-        raw_data = dict(fields)
-        # print(raw_data)
-        customer_name = raw_data.get('Customer Name', None)
-        if not customer_name:
-            return
-
-        customer_obj = Customer.objects.filter(name=customer_name).last()
-        print('customer_obj =', customer_obj)
-        if not customer_obj:
-            return
-
-        json_data = dict(
-            customer=customer_obj,
-            invoice_number=raw_data.get('Invoice Number', None),
-        )
-
-        invoice_obj, created = Invoice.objects.get_or_create(
-            **json_data
-        )
-
-        json_data.update(dict(
-            invoice_date=raw_data.get('Invoice Date', None),
-            due_date=raw_data.get('Due Date', None),
-            gst=Decimal(raw_data.get('Item Tax Amount', 0)),
-            amount=Decimal(raw_data.get('SubTotal', 0)),
-            total_amount=Decimal(raw_data.get('Total', 0)),
-        ))
-        # print('json_data =', json_data)
-        for key, value in json_data.items():
-            setattr(invoice_obj, key, value)
-        invoice_obj.save()
-
-        ivr = None
-        ivrobjs = IVRConfig.getivr(requestuser=invoice_obj.customer.primary_contact)
-        if ivrobjs:
-            ivr = ivrobjs.first()
-
-        if not ivr:
-            ivrids = IVRUser.objects.filter(
-                user=invoice_obj.customer.primary_contact).values_list('ivr', flat=True).distinct()
-            ivr = IVRConfig.objects.filter(id__in=ivrids).first()
-
-        InvoiceProduct.objects.get_or_create(
-            invoice=invoice_obj,
-            ivr=ivr,
-            unit_price=json_data['amount'],
-            amount=json_data['amount'],
-            gst=json_data['gst'],
-            total_amount=json_data['total_amount'],
-        )
-
-        invoice_status = raw_data.get('Invoice Status', None)
-        print('invoice_status =', invoice_status)
-        if invoice_status == 'Closed':
-            payment_obj, created = Payment.objects.get_or_create(
-                invoice=invoice_obj,
-                is_processed=True,
-                paid_amount=json_data['amount'],
-                payment_date=raw_data.get('Last Payment Date', None),
-                source_reference='csv',
-            )
-
-
 class KYCView(LoginRequiredMixin, SEOMixin, TemplateView):
     model = Customer
     form_class = KYCForm
@@ -709,7 +524,7 @@ class KYCView(LoginRequiredMixin, SEOMixin, TemplateView):
             'email': user.email,
         }
 
-        cust = Customer.objects.filter(primary_contact=user).last()
+        cust = Customer.objects.get_or_none(primary_contact=user)
 
         if cust:
             initial.update({
@@ -797,7 +612,7 @@ class KYCView(LoginRequiredMixin, SEOMixin, TemplateView):
                     pincode=data.get('shipping_pincode', None),
                 )
 
-            customer_obj = Customer.objects.filter(primary_contact=user).last()
+            customer_obj = Customer.objects.get_or_none(primary_contact=user)
             if not customer_obj:
                 customer_obj, created = Customer.objects.get_or_create(
                     primary_contact=user,
@@ -893,99 +708,6 @@ class CartCreateView(LoginRequiredMixin, PermissionRequiredMixin,
         return reverse('customer:cart_home')
 
 
-# PermissionRequiredMixin
-class CartUpdateView(LoginRequiredMixin, UpdateView):
-    model = Cart
-    form_class = CartCustomerForm
-    template_name = 'cart/cart_form.html'
-
-    # permission_required = ('customer.change_invoice', )
-
-    def get_object(self):
-        print("CartUpdateView.get_object()")
-
-        cart = getcart(self.request, **self.kwargs)
-        return cart
-
-    def dispatch(self, request, *args, **kwargs):
-        user = self.request.user
-
-        if not user.is_authenticated:
-            nextitem = '?next='+reverse('cart_edit')
-            return HttpResponseRedirect(reverse('login')+nextitem)
-
-        if not user.is_staff and not user.is_superuser:
-            if not get_customer(user):
-                nextitem = '?next='+reverse('cart_edit')
-                return HttpResponseRedirect(reverse('account_kyc')+nextitem)
-
-            if not self.get_object():
-                ivrid = IVRConfig.getivr_id(user)
-                payload = {'ivrid': ivrid, 'create_with_no_item': True}
-                result = create_subscription_cart(payload)
-
-            self.form_class = CartCustomerForm
-        else:
-            self.form_class = CartForm
-        # print('self.form_class =', self.form_class)
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Update Cart.'
-        context['submit_btn_text'] = 'Update'
-
-        if self.request.POST:
-            context['items'] = CartProductFormSet(
-                self.request.POST, instance=self.object)
-        else:
-            context['items'] = CartProductFormSet(instance=self.object)
-
-        if self.object:
-            for form in context['items']:
-                queryset = IVRConfig.objects.filter(user=self.object.customer.primary_contact)
-                form.fields['ivr'].queryset = queryset
-                if queryset.count() == 1:
-                    form.fields['ivr'].initial = queryset.first().id
-
-        # context['form'].fields['customer'].widget = forms.HiddenInput()
-        if self.object and not self.object.total_amount >= 1:
-            context['messages'] = ['Please select at least one product to checkout the cart']
-        return context
-
-    def form_valid(self, form):
-        context = self.get_context_data()
-        items = context['items']
-        # print('items form_valid = ', items)
-        with transaction.atomic():
-            self.object = form.save()
-            if items.is_valid():
-                print('----items.is_valid----')
-                items.instance = self.object
-                items.save()
-                # for item in items:
-                #     print('item.cleaned_data =============', item.cleaned_data)
-                #     is_delete = item.cleaned_data.get('DELETE')
-            else:
-                print('----items.errors----', items.errors)
-
-            self.object.reset_items()
-            # to update all price and gst value so save all items
-            [i.save() for i in self.object.items.all()]
-
-        return super().form_valid(form)
-
-    def get_success_url(self, *args, **kwargs):
-        if 'payment_url' in self.request.POST and self.object.total_amount >= 1:
-            # amount should be mroe than 1
-            return reverse("customer:payment", kwargs={'slug': self.object.slug})
-        user = self.request.user
-        if not user.is_staff and not user.is_superuser:
-            return reverse("cart_edit")
-        else:
-            return reverse("customer:cart_home")
-
-
 class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
     model = Cart
     template_name = 'cart/cart_item_page.html'
@@ -997,16 +719,6 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
     def get_object(self):
         cart = getcart(self.request, **self.kwargs)
         return cart
-
-    def get_ivr_object(self):
-        cart = self.get_object()
-        user = cart.customer.primary_contact
-
-        ivrid = IVRConfig.getivr_id(user)
-        ivr = IVRConfig.getbyid(user, ivrid)
-
-        # ivr = IVRConfig.objects.filter(user=user).last()
-        return ivr
 
     def has_existing_plan_ivr(self, ivr):
         has_existing_paid_ivr = ivr.config_type.name != 'free' \
@@ -1034,13 +746,8 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
             customer = get_customer(user)
             cart, created = Cart.objects.get_or_create(
                 is_open=True,
-                cart_type='subscription',
                 customer=customer,
             )
-
-        # ivr = self.get_ivr_object()
-        # if not ivr:
-        #     return HttpResponseRedirect(reverse('home'))
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -1052,9 +759,6 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
 
         cart = self.get_object()
         print('cart id =', cart.id)
-        # ivr = self.get_ivr_object()
-        #
-        # has_existing_paid_ivr = self.has_existing_plan_ivr(ivr)
 
         plan_products = products.filter(category="plan")
 
@@ -1149,7 +853,6 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
 
         cart = self.get_object()
         print('cart id =', cart.id)
-        # ivr = self.get_ivr_object()
 
         cart.items.all().delete()
 
@@ -1164,11 +867,6 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
 
         json_data = {'success': True}
 
-        # has_existing_paid_ivr = self.has_existing_plan_ivr(ivr)
-        # cart_has_plan_item = has_existing_paid_ivr or cart.items.filter(
-        #     product__category="plan", product__amount__gte=1
-        # ).exists()
-
         if 'payment' == submit_btn and cart.total_amount >= 1:
             # amount should be mroe than 1
             json_data['next'] = reverse("customer:payment", kwargs={'slug': cart.slug})
@@ -1181,7 +879,7 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
 
 
 def get_customer(user):
-    customer = Customer.objects.filter(primary_contact=user).order_by('id').last()
+    customer = Customer.objects.get_or_none(primary_contact=user)
     return customer
 
 

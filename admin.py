@@ -52,9 +52,9 @@ class CartProductInline(admin.TabularInline):
 
 class CartAdmin(CoreModelAdmin):
     list_display = ('id', 'invoice_number', 'customer', 'amount',
-                    'gst', 'total_amount', 'is_open', 'cart_type') + CoreModelAdmin.list_display
+                    'gst', 'total_amount', 'is_open',) + CoreModelAdmin.list_display
     search_fields = ('id', 'invoice_number', 'slug', 'customer__name',
-                     'amount', 'gst', 'total_amount', 'cart_type')
+                     'amount', 'gst', 'total_amount',)
     raw_id_fields = ('customer', )
     inlines = (CartProductInline,)
 

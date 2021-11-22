@@ -54,7 +54,6 @@ body {
           <tr>
             <th scope="col" class="d-none d-sm-table-cell">Cart No</th>
             <th scope="col" class="d-none d-sm-table-cell">Customer</th>
-            <th scope="col" class="d-none d-sm-table-cell">Cart Type</th>
             <th scope="col" class="d-none d-sm-table-cell">Is Open</th>
             <th scope="col" class="">Date</th>
             <th scope="col" class="text-right">Amount</th>
@@ -66,7 +65,6 @@ body {
           <tr class="row_{{ post.id }}" onclick="location.href='{% url 'customer:cart_edit' post.id %}'">
             <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">{{ post.slug }}</code></td>
             <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">{{ post.customer.name }}</code></td>
-            <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">{{ post.cart_type }}</code></td>
             <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">{{ post.is_open }}</code></td>
             <td class="text-nowrap">{{ post.dtm_created }}</td>
             <td class="text-right">{{ post.total_amount | floatformat:2 }}</td>

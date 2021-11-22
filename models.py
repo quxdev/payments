@@ -237,34 +237,14 @@ class CartInvoice(CoreModel):
 
 
 class Cart(CartInvoice):
-    CART_TYPE = (
-        ('user', 'user'),
-        ('system', 'system'),
-        ('subscription', 'subscription'),
-    )
     is_open = models.BooleanField(default=True)
-    # system_generated = models.BooleanField(default=False)
-    cart_type = models.CharField(max_length=16, choices=CART_TYPE, default='user')
 
-    # class Meta:
-    #     # not works on MySWL for Django 3.1
-    #     constraints = [
-    #         UniqueConstraint(fields=['customer'], condition=Q(
-    #             is_open=True), name='unique_customer_is_open')
-    #     ]
-
-    def clean(self):
-        if self.pk is None and self.is_open is True and self.customer_id is not None:
-            qs = self.__class__.objects.filter(
-                is_open=self.is_open,
-                customer=self.customer_id,
-                cart_type=self.cart_type
-            )
-            if qs.exists():
-                if self.cart_type == 'system':
-                    raise ValidationError(
-                        {"customer": "Cart is already exists with system type"})
-                raise ValidationError({"is_open": "Cart is already exists"})
+    class Meta:
+        # not works on MySWL for Django 3.1
+        constraints = [
+            models.UniqueConstraint(fields=['customer'], condition=Q(
+                is_open=True), name='unique_customer_is_open')
+        ]
 
     def __str__(self):
         return '%s : %s : %s' % (self.is_open, self.total_amount, self.customer_id)
@@ -299,8 +279,8 @@ class Cart(CartInvoice):
         )
 
     @classmethod
-    def create(cls, customer, product, cart_type='user'):
-        cart_obj = cls.objects.filter(customer=customer, is_open=True, cart_type=cart_type).last()
+    def create(cls, customer, product):
+        cart_obj = cls.objects.filter(customer=customer, is_open=True).last()
 
         print('last cart =', cart_obj)
 
@@ -316,8 +296,7 @@ class Cart(CartInvoice):
 
             cart_obj = cls.objects.create(
                 customer=customer,
-                invoice_number=invoice_number,
-                cart_type=cart_type
+                invoice_number=invoice_number
             )
 
         cart_obj.create_item(product)
@@ -458,22 +437,14 @@ class Cart(CartInvoice):
         if no_of_carts.count() == 1:
             cart = no_of_carts.first()
         else:
-
-            non_subs = no_of_carts.exclude(cart_type='subscription')
-            if non_subs:
-                for non_sub in non_subs:
-                    if non_sub.items.count() > 0:
-                        cart = non_sub
-                        break
+            for non_sub in no_of_carts:
+                if non_sub.items.count() > 0:
+                    cart = non_sub
+                    break
 
             if cart is None:
-                cart = no_of_carts.filter(cart_type='subscription').first()
+                cart = no_of_carts.first()
 
-        # cart = Cart.objects.filter(
-        #     customer=customer,
-        #     is_open=True,
-        #     cart_type='subscription'
-        # ).last()
         print('cart =', cart)
         return cart
 

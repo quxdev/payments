@@ -37,6 +37,15 @@ PRODUCT_GST_PERCENT = 18
 # 'RazorPay' OR 'Swipez'
 PAYMENT_PROVIDER = 'RazorPay'
 ON_PAYMENT_SUCCESS = 'payments.models.OnPaymentSuccess'
+
+SWIPEZ_SECRET_KEY = os.getenv('SWIPEZ_SECRET_KEY', None)
+SWIPEZ_MODE = os.getenv('SWIPEZ_MODE', 'TEST')
+
+INVOICE_SELLER = {
+    'name': 'Name',
+    'address': 'A-01, Address, City, India',
+    'gstin': '22ABCDE1703R1YZ'
+}
 ```
 
 Create `project/project/.env` file and store these required variables

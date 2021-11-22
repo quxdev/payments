@@ -521,7 +521,7 @@ class CartForm(forms.ModelForm):
     class Meta:
         model = Cart
         fields = ['customer', 'slug', 'invoice_number', 'invoice_date',
-                  'due_date', 'cart_type']  # , 'amount', 'gst'
+                  'due_date']  # , 'amount', 'gst'
 
     customer = forms.ModelChoiceField(
         queryset=Customer.objects.all(),
@@ -563,13 +563,6 @@ class CartForm(forms.ModelForm):
             'value': datetime.date.today()
         })
     )
-
-    cart_type = forms.CharField(
-        required=False,
-        initial='system',
-        widget=forms.HiddenInput()
-    )
-
 
 class CartCustomerForm(forms.ModelForm):
     class Meta:

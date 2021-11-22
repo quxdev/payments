@@ -28,7 +28,6 @@ urlpatterns = [
 
     path('cart/', CartListView.as_view(), name='cart_home'),
     path('cart/new/', CartCreateView.as_view(), name='cart_new'),
-    # re_path('cart/(?:(?P<pk>[0-9]+)/)?', CartUpdateView.as_view(), name='cart_edit'),
     re_path('cart/(?:(?P<pk>[0-9]+)/)?', CartItemPage.as_view(), name='cart_edit'),
 
     path('payment/', PaymentListView.as_view(), name='payment_home'),
@@ -39,8 +38,6 @@ urlpatterns = [
 
     path('invoice-by-customer/<int:customer_id>/',
          getinvoice_by_customer, name='invoice_by_customer'),
-    path('ivr-by-customer/<int:customer_id>/',
-         getivr_by_customer, name='ivr_by_customer'),
     path('open-cart-by-customer/<int:customer_id>/',
          getopen_cart_by_customer, name='open_cart_by_customer'),
     path('address-by-user/<int:user_id>/',
