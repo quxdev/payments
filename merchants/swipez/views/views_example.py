@@ -11,12 +11,12 @@ from customer.payment.swipez.views.views import swipez_webhook_payload
 
 
 class HomePageView(TemplateView):
-    template_name = 'example/pay.html'
+    template_name = 'merchants/swipez/example/pay.html'
 
 
 def test(request):
     data = swipez_payment_payload(testpayload())
-    return render(request, 'example/test.html', data)
+    return render(request, 'merchants/swipez/example/test.html', data)
 
 
 def payment(request):
@@ -42,7 +42,7 @@ def response(request):
     # status = 'failed'  | message = 'Cancelled by user'
 
     data = swipez_webhook_payload(request.POST)
-    return render(request, 'example/response.html', data)
+    return render(request, 'merchants/swipez/example/response.html', data)
 
 
 def testpayload():

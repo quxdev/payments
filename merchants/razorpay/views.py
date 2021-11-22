@@ -26,7 +26,7 @@ def razorpay_create_order(request, jsondata, action_url):
         'key': os.getenv('RAZORPAY_KEY'),
         'action_url': action_url
     }
-    return render(request, "razorpay_payment.html", context)
+    return render(request, "merchants/razorpay/razorpay_payment.html", context)
 
 
 def razorpay_verify_signature(razorpay_order_id, razorpay_payment_id, razorpay_signature):

@@ -125,26 +125,26 @@ def webhook(request, reference: str):
     # invoice = Invoice.objects.get_or_none(invoice_number=reference)
     # if invoice is None:
     #     data['error'] = 'PaymentNotFound'
-    #     return render(request, 'failure.html', data)
+    #     return render(request, 'merchants/failure.html', data)
 
     cart = Cart.objects.get_or_none(slug=reference)
     if cart is None:
         data['error'] = 'PaymentNotFound'
-        return render(request, 'failure.html', data)
+        return render(request, 'merchants/failure.html', data)
 
     invoice = Invoice.create(cart)
 
     payment = Payment.create(invoice)
     if payment is None:
         data['error'] = 'PaymentNotFound'
-        return render(request, 'failure.html', data)
+        return render(request, 'merchants/failure.html', data)
 
     data['slug'] = payment.invoice.slug
     if payment.is_processed:
         data['payment'] = model_to_dict(payment, exclude=['id', 'post_dict', 'new_object_id'])
         data['invoice'] = model_to_dict(payment.invoice)
         data['error'] = 'InvoiceIsPaid'
-        return render(request, 'failure.html', data)
+        return render(request, 'merchants/failure.html', data)
 
     if settings.PAYMENT_PROVIDER == 'Swipez':
         payload = swipez_webhook_payload(request.POST)
@@ -152,7 +152,7 @@ def webhook(request, reference: str):
         if payload['signature'] != postdata['checksum']:
             data['error'] = 'ChecksumFailed'
             send_email_for_payment(payment)
-            return render(request, 'failure.html', data)
+            return render(request, 'merchants/failure.html', data)
 
         if request.POST.get('status', 'failed') == 'success':
             payment.is_processed = True
@@ -171,7 +171,7 @@ def webhook(request, reference: str):
         data['payment'] = model_to_dict(payment, exclude=['id', 'post_dict', 'new_object_id'])
         data['invoice'] = model_to_dict(payment.invoice)
 
-        # return render(request, 'failure.html', data)
+        # return render(request, 'merchants/failure.html', data)
         send_email_for_payment(payment)
         return HttpResponseRedirect(reverse('customer:invoice_detail', kwargs={'slug': invoice.slug}))
 
@@ -205,6 +205,6 @@ def webhook(request, reference: str):
         data['payment'] = model_to_dict(payment, exclude=['id', 'post_dict', 'new_object_id'])
         data['invoice'] = model_to_dict(payment.invoice)
 
-        # return render(request, 'failure.html', data)
+        # return render(request, 'merchants/failure.html', data)
         send_email_for_payment(payment)
         return HttpResponseRedirect(reverse('customer:invoice_detail', kwargs={'slug': invoice.slug}))

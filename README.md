@@ -21,7 +21,6 @@ INSTALLED_APPS += [
     'qux',
     'qux.seo',
     'payments',
-    'payments.payment',
 
     'rangefilter',
 ]
@@ -35,6 +34,7 @@ SITE_ID = 1
 TEAM_SALES = []
 SERVICE_TEAM = []
 PRODUCT_GST_PERCENT = 18
+# 'RazorPay' OR 'Swipez'
 PAYMENT_PROVIDER = 'RazorPay'
 ON_PAYMENT_SUCCESS = 'payments.models.OnPaymentSuccess'
 ```
@@ -43,6 +43,7 @@ Create `project/project/.env` file and store these required variables
 ```sh
 export RAZORPAY_KEY="for-razorpay-payment-gateway"
 export RAZORPAY_SECRET="for-razorpay-payment-gateway"
+export SWIPEZ_SECRET_KEY="for-swipez-payment-gateway"
 ```
 
 # Add URL in the project

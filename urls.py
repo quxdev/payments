@@ -2,11 +2,13 @@ from django.urls import path
 from django.urls import re_path
 
 from .views import *
-from .payment.views import *
+from .merchants.views import *
 
 app_name = 'customer'
 
 urlpatterns = [
+    path('', PaymentHome.as_view(), name='home'),
+
     path('product/<str:productsku>/payment/', getitem, name='buyitem'),
     path('cart/<str:slug>/payment/', getpaid, name='payment'),
     path('payment/webhook/<str:reference>/', webhook, name='webhook'),

@@ -28,6 +28,13 @@ from qux.seo.mixin import SEOMixin
 from .models import *
 
 
+class PaymentHome(LoginRequiredMixin, SEOMixin, TemplateView):
+    template_name = 'home.html'
+    extra_context = {
+        'breadcrumbs': ['Home']
+    }
+
+
 class AddressListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Address
     queryset = Address.objects.all()

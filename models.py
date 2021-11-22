@@ -44,7 +44,7 @@ class OnPaymentSuccess:
 
 
 class Address(CoreModelPlus):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
     address = models.TextField(**default_null_blank)
     city = models.CharField(max_length=128, **default_null_blank)
     state = models.CharField(max_length=128, **default_null_blank)
@@ -373,6 +373,10 @@ class Cart(CartInvoice):
     def swipez_payload(self):
         user = self.customer.primary_contact
 
+        addressObj = None
+        if self.customer.billing_address:
+            addressObj = self.customer.billing_address
+
         webhook = reverse('customer:webhook', kwargs={'reference': self.slug})
         result = {
             'account_id': 'M000000041',
@@ -381,11 +385,11 @@ class Cart(CartInvoice):
             'description': '',
             'amount': '{:.2f}'.format(self.total_amount),
             'name': f'{user.first_name} {user.last_name}',
-            'address': user.profile.address,
-            'city': user.profile.city,
-            'state': user.profile.state,
-            'postal_code': user.profile.pincode,
-            'phone': user.profile.phone[-10:],
+            'address': addressObj.address if addressObj else None,
+            'city': addressObj.city if addressObj else None,
+            'state': addressObj.state if addressObj else None,
+            'postal_code': addressObj.pincode if addressObj else None,
+            'phone': self.customer.phone[-10:],
             'email': user.email,
         }
 
