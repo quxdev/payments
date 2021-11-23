@@ -1,7 +1,14 @@
 {% extends 'invoice/_invoice.html' %}
 {% load static %}
 
-{% block h1 %}Invoices{% endblock %}
+{% block stylesheets %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/listview.css' %}">
+{% endblock stylesheets %}
+
+{% block customstyle %}
+  {{ block.super }}
+{% endblock %}
 
 {% block rawcontent %}
   {{ block.super }}
@@ -22,9 +29,11 @@
   <div class="container-md">
     <div class="form-container p-md-4">
       <h1 class="py-4">
-        Invoice
+        Invoices
       </h1>
-      <table class="table table-hover table-borderless table-sm">
+
+      {% if object_list %}
+      <table class="table table-hover table-borderless table-striped">
         <thead>
           <tr>
             <th scope="col" class="d-none d-sm-table-cell">Invoice No</th>
@@ -34,7 +43,6 @@
           </tr>
         </thead>
         <tbody>
-          {% if object_list %}
           {% for post in object_list %}
           <tr class="row_{{ post.id }}" onclick="location.href='{% url 'customer:invoice_detail' post.slug %}'">
             <td data-th="Invoice" class="text-nowrap d-none d-sm-table-cell">
@@ -47,30 +55,11 @@
             </td>
           </tr>
           {% endfor %}
-          {% elif user.username == 'vishal' %}
-          <tr class="row_{{ post.id }}" onclick="location.href='{% url 'customer:invoice_detail' 1 %}';">
-            <td data-th="Invoice" class="text-nowrap d-none d-sm-table-cell">
-              inv_H5ABqNf12alupwXz
-            </td>
-            <td data-th="Date" class="text-nowrap">Feb 29, 2020</td>
-            <td data-th="Amount" class="text-right">4,500.00</td>
-            <td data-th="Menu" class="text-right">
-              <i class="fas fa-ellipsis-h-alt"></i>
-            </td>
-          </tr>
-          <tr class="row_{{ post.id }}" onclick="location.href='{% url 'customer:invoice_detail' 1 %}';">
-            <td data-th="Invoice" class="text-nowrap d-none d-sm-table-cell">
-              inv_H5ABqNf12alu4prX
-            </td>
-            <td data-th="Date" class="text-nowrap">Feb 29, 2020</td>
-            <td data-th="Amount" class="text-right">4,500.00</td>
-            <td data-th="Menu" class="text-right">
-              <i class="fas fa-ellipsis-h-alt"></i>
-            </td>
-          </tr>
-          {% endif %}
         </tbody>
       </table>
+      {% else %}
+      <p class="lead">You have no Invoice yet.</p>
+      {% endif %}
 
       {% if user.is_staff or user.is_superuser %}
       <div class="row mt-4">

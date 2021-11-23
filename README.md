@@ -31,8 +31,8 @@ STATICFILES_DIRS = [
 ]
 
 SITE_ID = 1
-TEAM_SALES = []
-SERVICE_TEAM = []
+TEAM_SALES = ['emailid_id@example.com']
+SERVICE_TEAM = ['emailid_id@example.com']
 PRODUCT_GST_PERCENT = 18
 # 'RazorPay' OR 'Swipez'
 PAYMENT_PROVIDER = 'RazorPay'

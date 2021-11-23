@@ -1,6 +1,5 @@
-{% extends '_form.html' %}
-{% load static %}
-{% load xcv_forms %}
+{% extends 'forms/_form.html' %}
+{% load static qux quxform %}
 
 {% block stylesheets %}
   {{ block.super }}
@@ -40,7 +39,7 @@
 <form method="post">
   {% csrf_token %}
 
-    {% include 'includes/_hfields.html' %}
+    {% include 'forms/_hfields.html' %}
 
     <br>
     <legend>IVR / Products</legend>
@@ -77,16 +76,16 @@
 
 
     <div class="row mt-4">
-    <div class="col">
-      <button type="submit" class="btn btn-primary btn-block py-2">
-        {% if submit_btn_text %}
-           {{ submit_btn_text }}
-        {% else %}
-           Submit
-        {% endif %}
-      </button>
+      <div class="col">
+        <button type="submit" class="btn btn-primary btn-block py-2">
+          {% if submit_btn_text %}
+             {{ submit_btn_text }}
+          {% else %}
+             Submit
+          {% endif %}
+        </button>
+      </div>
     </div>
-  </div>
 </form>
 {% endblock form_body %}
 

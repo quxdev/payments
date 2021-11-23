@@ -41,6 +41,12 @@ class AddressListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     def get_queryset(self):
         queryset = Address.objects.all().order_by('-id')
 
+        user = self.request.user
+        if not user.is_staff and not user.is_superuser:
+            queryset = queryset.filter(
+                user=user
+            )
+
         return queryset
 
 
@@ -135,6 +141,12 @@ class CustomerListView(LoginRequiredMixin, PermissionRequiredMixin,
     def get_queryset(self):
         queryset = Customer.objects.all().order_by('-id')
 
+        user = self.request.user
+        if not user.is_staff and not user.is_superuser:
+            queryset = queryset.filter(
+                primary_contact=user
+            )
+
         return queryset
 
 
@@ -183,6 +195,12 @@ class InvoiceListView(LoginRequiredMixin, PermissionRequiredMixin,
 
     def get_queryset(self):
         queryset = Invoice.objects.all().order_by('-id')
+
+        user = self.request.user
+        if not user.is_staff and not user.is_superuser:
+            queryset = queryset.filter(
+                customer__primary_contact=user
+            )
 
         return queryset
 
@@ -291,6 +309,12 @@ class PaymentListView(LoginRequiredMixin, PermissionRequiredMixin,
 
     def get_queryset(self):
         queryset = Payment.objects.all().order_by('-id')
+
+        user = self.request.user
+        if not user.is_staff and not user.is_superuser:
+            queryset = queryset.filter(
+                customer__primary_contact=user
+            )
 
         return queryset
 
@@ -660,6 +684,12 @@ class CartListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = Cart.objects.all().order_by('-dtm_updated')
+
+        user = self.request.user
+        if not user.is_staff and not user.is_superuser:
+            queryset = queryset.filter(
+                customer__primary_contact=user
+            )
 
         return queryset
 

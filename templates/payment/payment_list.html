@@ -1,7 +1,14 @@
 {% extends '_customer.html' %}
 {% load static %}
 
-{% block h1 %}Payments{% endblock %}
+{% block stylesheets %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/listview.css' %}">
+{% endblock stylesheets %}
+
+{% block customstyle %}
+  {{ block.super }}
+{% endblock %}
 
 {% block rawcontent %}
   {{ block.super }}
@@ -64,15 +71,15 @@
       {% else %}
       <p class="lead">You have no payments yet.</p>
       {% endif %}
-    </div>
 
-    <div class="row mt-4">
-      <div class="col-12 col-md text-md-right mt-4 my-md-0">
-        <a href="{% url 'customer:payment_new' %}" class="btn btn-block btn-primary text-white py-2">
-          <span>Create New Payment</span>
-        </a>
+      <div class="row mt-4">
+        <div class="col-12 col-md text-md-right mt-4 my-md-0">
+          <a href="{% url 'customer:payment_new' %}" class="btn btn-block btn-primary text-white py-2">
+            <span>Create New Payment</span>
+          </a>
+        </div>
       </div>
-    </div>
 
+    </div>
   </div>
 {% endblock rawcontent %}

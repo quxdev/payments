@@ -24,16 +24,17 @@
   {% include 'forms/_hfields.html' %}
 
   <div class="row mt-4">
-    <div class="col-12 offset-sm-4 col-sm-8">
-      <button type="submit" class="btn btn-primary btn-block">
+    <div class="col">
+      <button type="submit" class="btn btn-primary btn-block py-2">
         {% if submit_btn_text %}
-          {{ submit_btn_text }}
+           {{ submit_btn_text }}
         {% else %}
-          Submit
+           Submit
         {% endif %}
       </button>
     </div>
   </div>
+
 </form>
 {% endblock form_body %}
 

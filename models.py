@@ -105,9 +105,9 @@ class Customer(CoreModel):
     )
     gstin_verified = models.BooleanField(default=False, verbose_name='GSTIN Verified')
     pan_verified = models.BooleanField(default=False, verbose_name='PAN Verified')
-    primary_contact = models.ForeignKey(
+    primary_contact = models.OneToOneField(
         User, on_delete=models.CASCADE,
-        related_name='primay_customers', verbose_name='Primary Contact')
+        related_name='primay_customer', verbose_name='Primary Contact')
     users = models.ManyToManyField(User, blank=True, related_name='users_customers')
     website = models.URLField(default=None, blank=True, null=True)
     whatsapp = models.CharField(
@@ -290,8 +290,6 @@ class Cart(CartInvoice):
                 product__category__iexact='plan'
             ).delete()
         else:
-            # invoice_number = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-            # invoice_number = invoice_number + "{:06x}".format(user.id)
             invoice_number = Invoice.generate_slug()
 
             cart_obj = cls.objects.create(
@@ -389,8 +387,8 @@ class Cart(CartInvoice):
         all_values = super().to_dict(verbose_name=True, exclude=exclude)
         all_values['user_email'] = {'label': "User Email",
                                     'value': self.customer.primary_contact.email}
-        # all_values['user_phone'] = {'label': "User Phone",
-        #                             'value': self.customer.primary_contact.profile.phone}
+        all_values['user_phone'] = {'label': "User Phone",
+                                    'value': self.customer.phone}
 
         if not self.invoice_date:
             del all_values['invoice_date']
@@ -613,7 +611,7 @@ class Payment(CoreModel):
     # two blank value can not allow in unique field
     slug = models.SlugField(max_length=32, unique=True, null=True, default=None)
     invoice = models.ForeignKey(Invoice, on_delete=models.DO_NOTHING)
-    customer = models.ForeignKey(Customer, on_delete=models.DO_NOTHING, **default_null_blank)
+    customer = models.ForeignKey(Customer, on_delete=models.DO_NOTHING)
     payment_date = models.DateField(**default_null_blank)
     payment_mode = models.CharField(max_length=16, choices=PAYMENT_MODE)
     payment_source = models.CharField(max_length=16, choices=PAYMENT_SOURCE, **default_null_blank)

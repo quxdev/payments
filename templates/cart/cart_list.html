@@ -7,29 +7,12 @@
 {% endblock stylesheets %}
 
 {% block customstyle %}
-{{ block.super }}
-<style>
-body {
-  background: rgb(236, 240, 248) !important;
-}
-.table thead {
-  background: rgba(0, 0, 0, 0.20);
-}
-.table tbody {
-  background: white;
-}
-.table tbody tr {
-  cursor: pointer;
-}
-.table th, .table td {
-  padding: 0.5rem;
-  border-bottom: 1px solid rgb(229, 231, 233);
-}
-</style>
+  {{ block.super }}
 {% endblock %}
 
 {% block rawcontent %}
-{{ block.super }}
+  {{ block.super }}
+
   <div class="container-md">
     <div class="form-container py-4 p-md-4">
       <div class="form_prefix">
@@ -43,13 +26,14 @@ body {
     </div>
   </div>
 
-  <div class="container-xl my-4">
-    <div id="cart_list" class="">
+  <div class="container-md">
+    <div class="form-container p-md-4">
       <h1 class="py-4">
         Carts
       </h1>
 
-      <table class="table table-hover table-borderless table-sm">
+      {% if object_list %}
+      <table class="table table-hover table-borderless table-striped">
         <thead>
           <tr>
             <th scope="col" class="d-none d-sm-table-cell">Cart No</th>
@@ -60,7 +44,6 @@ body {
           </tr>
         </thead>
         <tbody>
-          {% if object_list %}
           {% for post in object_list %}
           <tr class="row_{{ post.id }}" onclick="location.href='{% url 'customer:cart_edit' post.id %}'">
             <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">{{ post.slug }}</code></td>
@@ -70,15 +53,11 @@ body {
             <td class="text-right">{{ post.total_amount | floatformat:2 }}</td>
           </tr>
           {% endfor %}
-          {% elif user.username == 'vishal' %}
-          <tr class="row_{{ post.id }}" onclick="location.href='{% url 'customer:invoice_detail' 1 %}';">
-            <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">inv_H5ABqNf12alupwXz</code></td>
-            <td class="text-nowrap">Feb 29, 2020</td>
-            <td class="text-right">4,500.00</td>
-          </tr>
-          {% endif %}
         </tbody>
       </table>
+      {% else %}
+      <p class="lead">You have no Cart yet.</p>
+      {% endif %}
 
       <div class="row mt-4">
         <div class="col-12 col-md text-md-right mt-4 my-md-0">
