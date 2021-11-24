@@ -84,12 +84,12 @@ def getpaid(request, slug: str):
         next_page = '?next='+reverse('customer:payment', kwargs={'slug': slug})
         if request.user.is_staff or request.user.is_superuser:
             url = reverse(
-                'account_kyc',
+                'customer:account_kyc',
                 kwargs={'userid': cart.customer.primary_contact_id}
             )
             return HttpResponseRedirect(url+next_page)
 
-        return HttpResponseRedirect(reverse('account_kyc')+next_page)
+        return HttpResponseRedirect(reverse('customer:account_kyc')+next_page)
 
     send_email_on_payment_visit(cart)
 

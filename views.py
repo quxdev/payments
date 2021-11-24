@@ -750,24 +750,18 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
         cart = getcart(self.request, **self.kwargs)
         return cart
 
-    def has_existing_plan_ivr(self, ivr):
-        has_existing_paid_ivr = ivr.config_type.name != 'free' \
-            and (ivr.end_date is None or ivr.end_date >= timezone.now().date())
-
-        return has_existing_paid_ivr
-
     def dispatch(self, request, *args, **kwargs):
         user = self.request.user
 
         if not user.is_authenticated:
-            nextitem = '?next='+reverse('cart_edit')
+            nextitem = '?next='+reverse('customer:cart_edit')
             return HttpResponseRedirect(reverse('login')+nextitem)
 
         # if not user.is_staff and not user.is_superuser:
         customer = get_customer(user)
         if not customer or (customer.gstin is None and customer.pan is None):
-            nextitem = '?next='+reverse('cart_edit')
-            return HttpResponseRedirect(reverse('account_kyc')+nextitem)
+            nextitem = '?next='+reverse('customer:cart_edit')
+            return HttpResponseRedirect(reverse('customer:account_kyc')+nextitem)
 
         if not self.get_object():
             # ivrid = IVRConfig.getivr_id(user)
@@ -814,7 +808,7 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
 
         data = {
             "cart": cart,
-            # "has_existing_paid_ivr": has_existing_paid_ivr,
+            # "has_existing_paid_plan": has_existing_paid_plan,
             "last_plan_product_id": last_plan_product_id,
             "disabled_plan_products": disabled_plan_products,
             "products": {
@@ -844,7 +838,7 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
                     checkout_json["agent"][key] = item.qty
 
         # if plan is not added in cart then add default plan product check if no paid plan exists with ivr
-        if len(checkout_json["plan"]) == 0 and not has_existing_paid_ivr:
+        if len(checkout_json["plan"]) == 0:
             plan_product_id = None
             # choose last purchased plan if exists
             if last_plan_product_id:
@@ -901,7 +895,7 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
             # amount should be mroe than 1
             json_data['next'] = reverse("customer:payment", kwargs={'slug': cart.slug})
         elif not user.is_staff and not user.is_superuser:
-            json_data['next'] = reverse("cart_edit")
+            json_data['next'] = reverse("customer:cart_edit")
         else:
             json_data['next'] = reverse("customer:cart_home")
 

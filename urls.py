@@ -30,6 +30,10 @@ urlpatterns = [
     path('cart/new/', CartCreateView.as_view(), name='cart_new'),
     re_path('cart/(?:(?P<pk>[0-9]+)/)?', CartItemPage.as_view(), name='cart_edit'),
 
+    # for customer
+    re_path('checkout/(?:(?P<pk>[0-9]+)/)?', CartItemPage.as_view(), name='cart_checkout'),
+    re_path('kyc/(?:(?P<userid>[0-9]+)/)?', KYCView.as_view(), name='account_kyc'),
+
     path('payment/', PaymentListView.as_view(), name='payment_home'),
     path('payment/new/', PaymentCreateView.as_view(), name='payment_new'),
     path('payment/<str:slug>/edit/', PaymentUpdateView.as_view(), name='payment_edit'),

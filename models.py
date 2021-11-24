@@ -34,12 +34,13 @@ def get_current_domain():
 
 
 class OnPaymentSuccess:
-    def __init__(self, user):
-        self.user = user
+    def __init__(self, payment_obj):
+        self.payment_obj = payment_obj
 
     def process(self):
-        print("OnPaymentSuccess process(), user: ", self.user)
-        # your business logic if payment is paid successfully
+        print("OnPaymentSuccess process(), payment_obj: ", self.payment_obj)
+        # ModelNameToCreate.create(self.payment_obj)
+
         return True
 
 
@@ -742,7 +743,7 @@ def payment_postsave(sender, instance, created, **kwargs):
         mod_name, func_name = settings.ON_PAYMENT_SUCCESS.rsplit('.', 1)
         mod = importlib.import_module(mod_name)
         clss = getattr(mod, func_name)
-        clss(user).process()
+        clss(instance).process()
 
 
 def send_email_for_payment(payment):

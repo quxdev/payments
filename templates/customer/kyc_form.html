@@ -1,4 +1,4 @@
-{% extends 'app/_app_form.html' %}
+{% extends 'forms/_form.html' %}
 {% load static %}
 
 {% block stylesheets %}
@@ -27,7 +27,7 @@
 
 <form method="post" enctype="multipart/form-data">
 {% csrf_token %}
-  {% include 'includes/_hfields.html' %}
+  {% include 'forms/_hfields.html' %}
 
   <div class="row mt-4">
     <div class="col-12 offset-sm-4 col-sm-8">
