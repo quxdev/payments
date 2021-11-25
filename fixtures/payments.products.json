@@ -1,0 +1,65 @@
+[
+{
+  "model": "payments.product",
+  "pk": 1,
+  "fields": {
+    "dtm_created": "2021-11-24T09:29:55.525Z",
+    "dtm_updated": "2021-11-25T12:12:14.075Z",
+    "sku": "PLAN0001",
+    "amount": "10.000",
+    "description": "Bronze",
+    "category": "plan",
+    "minutes_included": 0,
+    "agents_included": 1,
+    "call_recording_included": false,
+    "monthly_validity": 1,
+    "is_active": true,
+    "expiry_date": null,
+    "sac_code": null,
+    "is_included": false,
+    "addon": null
+  }
+},
+{
+  "model": "payments.product",
+  "pk": 2,
+  "fields": {
+    "dtm_created": "2021-11-24T11:08:31.115Z",
+    "dtm_updated": "2021-11-25T12:12:19.670Z",
+    "sku": "PLAN0002",
+    "amount": "15.000",
+    "description": "Silver",
+    "category": "plan",
+    "minutes_included": 0,
+    "agents_included": 1,
+    "call_recording_included": false,
+    "monthly_validity": 1,
+    "is_active": true,
+    "expiry_date": null,
+    "sac_code": null,
+    "is_included": false,
+    "addon": null
+  }
+},
+{
+  "model": "payments.product",
+  "pk": 3,
+  "fields": {
+    "dtm_created": "2021-11-24T11:09:16.538Z",
+    "dtm_updated": "2021-11-25T12:12:25.391Z",
+    "sku": "PLAN0003",
+    "amount": "25.000",
+    "description": "Gold",
+    "category": "plan",
+    "minutes_included": 0,
+    "agents_included": 1,
+    "call_recording_included": false,
+    "monthly_validity": 1,
+    "is_active": true,
+    "expiry_date": null,
+    "sac_code": null,
+    "is_included": false,
+    "addon": null
+  }
+}
+]

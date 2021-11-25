@@ -46,7 +46,8 @@ def getitem(request, productsku: str):
     else:
         cart_obj = Cart.create(customer_obj, product)
 
-    return HttpResponseRedirect(reverse("customer:cart_edit", kwargs={'pk': cart_obj.id}))
+    # , kwargs={'pk': cart_obj.id}
+    return HttpResponseRedirect(reverse("customer:cart_edit"))
 
 
 def send_email_on_payment_visit(cart):

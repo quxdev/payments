@@ -775,7 +775,7 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
 
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
+    def get_json_data(self):
         user = self.request.user
 
         products = Product.objects.filter(is_active=True)\
@@ -862,7 +862,10 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
         data["initial"] = checkout_json
         print("checkout_json =", checkout_json)
 
-        # TODO: add current plan and validate frontend
+        return data
+
+    def get(self, request, *args, **kwargs):
+        data = self.get_json_data()
 
         context = self.get_context_data(**kwargs)
         data.update(context)
