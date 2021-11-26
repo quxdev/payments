@@ -36,6 +36,7 @@ SERVICE_TEAM = ['emailid_id@example.com']
 PRODUCT_GST_PERCENT = 18
 # 'RazorPay' OR 'Swipez'
 PAYMENT_PROVIDER = 'RazorPay'
+KYC_GST_PAN_REQUIRED = True
 ON_PAYMENT_SUCCESS = 'payments.models.OnPaymentSuccess'
 
 SWIPEZ_SECRET_KEY = os.getenv('SWIPEZ_SECRET_KEY', None)

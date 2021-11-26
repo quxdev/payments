@@ -81,7 +81,7 @@ def getpaid(request, slug: str):
         raise Http404('Invalid URL')
     if cart.is_open is False:
         raise Http404('Cart is already closed. Thank you')
-    if cart.customer.gstin in ['', None] and cart.customer.pan in ['', None]:
+    if settings.KYC_GST_PAN_REQUIRED and cart.customer.gstin in ['', None] and cart.customer.pan in ['', None]:
         next_page = '?next='+reverse('customer:payment', kwargs={'slug': slug})
         if request.user.is_staff or request.user.is_superuser:
             url = reverse(

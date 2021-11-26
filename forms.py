@@ -324,26 +324,10 @@ class PaymentForm(forms.Form):
     )
 
 
-class KYCForm(forms.Form):
+class ReqKYCForm(forms.Form):
     def __init__(self, user, *args, **kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
-
-    def clean(self):
-        gstin = self.cleaned_data.get('gstin')
-        pan = self.cleaned_data.get('pan')
-        if not gstin and not pan:
-            raise forms.ValidationError('Please enter GSTIN or PAN.')
-
-        qs = Customer.objects.filter(
-            pan=pan
-        ).exclude(primary_contact=self.user)
-        if qs.exists():
-            raise ValidationError({
-                "pan": "Pan number is already in use. Please enter another Pan number."
-            })
-
-        return self.cleaned_data
 
     name = forms.CharField(
         label='Company Name',
@@ -379,28 +363,6 @@ class KYCForm(forms.Form):
             'placeholder': 'Enter Email'
         }),
         max_length=255
-    )
-
-    gstin = forms.CharField(
-        required=False,
-        label='GSTIN',
-        widget=forms.TextInput(attrs={
-            'class': 'form-control foo-border',
-            'placeholder': 'Enter GSTIN',
-            'style': 'text-transform:uppercase'
-        }),
-        max_length=15, validators=[Customer.gstin_regexp]
-    )
-
-    pan = forms.CharField(
-        required=False,
-        label='PAN',
-        widget=forms.TextInput(attrs={
-            'class': 'form-control foo-border',
-            'placeholder': 'Enter PAN',
-            'style': 'text-transform:uppercase'
-        }),
-        max_length=10, validators=[Customer.pan_regexp]
     )
 
     billing_address = forms.CharField(
@@ -517,6 +479,49 @@ class KYCForm(forms.Form):
     )
 
 
+class KYCForm(ReqKYCForm):
+    field_order = ['name', 'contact_name', 'phone', 'email', 'gstin', 'pan', 'billing_address', 'billing_city', 'billing_state', 'billing_pincode',
+                   'billing_country', 'same_as_billing_address', 'shipping_address', 'shipping_city', 'shipping_state', 'shipping_pincode', 'shipping_country']
+
+    def clean(self):
+        gstin = self.cleaned_data.get('gstin')
+        pan = self.cleaned_data.get('pan')
+        if not gstin and not pan:
+            raise forms.ValidationError('Please enter GSTIN or PAN.')
+
+        qs = Customer.objects.filter(
+            pan=pan
+        ).exclude(primary_contact=self.user)
+        if qs.exists():
+            raise ValidationError({
+                "pan": "Pan number is already in use. Please enter another Pan number."
+            })
+
+        return self.cleaned_data
+
+    gstin = forms.CharField(
+        required=False,
+        label='GSTIN',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control foo-border',
+            'placeholder': 'Enter GSTIN',
+            'style': 'text-transform:uppercase'
+        }),
+        max_length=15, validators=[Customer.gstin_regexp]
+    )
+
+    pan = forms.CharField(
+        required=False,
+        label='PAN',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control foo-border',
+            'placeholder': 'Enter PAN',
+            'style': 'text-transform:uppercase'
+        }),
+        max_length=10, validators=[Customer.pan_regexp]
+    )
+
+
 class CartForm(forms.ModelForm):
     class Meta:
         model = Cart
@@ -563,6 +568,7 @@ class CartForm(forms.ModelForm):
             'value': datetime.date.today()
         })
     )
+
 
 class CartCustomerForm(forms.ModelForm):
     class Meta:

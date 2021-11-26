@@ -175,7 +175,7 @@ class Customer(CoreModel):
                 'label': "GST",
                 'value': self.gstin + ' ' + ('Verified' if self.gstin_verified else 'Not Verified')
             }
-        else:
+        elif self.pan:
             all_values['pan'] = {
                 'label': "PAN",
                 'value': self.pan + ' ' + ('Verified' if self.pan_verified else 'Not Verified')

@@ -536,7 +536,7 @@ def cart_validation(request, ivrid: int):
 
 class KYCView(LoginRequiredMixin, SEOMixin, TemplateView):
     model = Customer
-    form_class = KYCForm
+    form_class = KYCForm if settings.KYC_GST_PAN_REQUIRED else ReqKYCForm
     template_name = 'customer/kyc_form.html'
 
     def get_initial(self, request, user):
@@ -657,8 +657,8 @@ class KYCView(LoginRequiredMixin, SEOMixin, TemplateView):
             customer_obj.save()
 
             next = request.GET.get('next', None)
-            if next and (
-                    customer_obj.gstin not in ['', None] or customer_obj.pan not in ['', None]):
+            if next and ((settings.KYC_GST_PAN_REQUIRED is False and customer_obj.billing_address is not None) or
+                    (customer_obj.gstin not in ['', None] or customer_obj.pan not in ['', None])):
                 return HttpResponseRedirect(next)
 
             # messages.success(request, "KYC saved successfully")
@@ -759,7 +759,7 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
 
         # if not user.is_staff and not user.is_superuser:
         customer = get_customer(user)
-        if not customer or (customer.gstin is None and customer.pan is None):
+        if not customer or (settings.KYC_GST_PAN_REQUIRED and customer.gstin is None and customer.pan is None) or (settings.KYC_GST_PAN_REQUIRED is False and customer.billing_address is None):
             nextitem = '?next='+reverse('customer:cart_edit')
             return HttpResponseRedirect(reverse('customer:account_kyc')+nextitem)
 
