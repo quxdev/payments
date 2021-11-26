@@ -272,12 +272,14 @@ class Cart(CartInvoice):
         return slug
 
     def create_item(self, product, qty=1):
-        CartProduct.objects.update_or_create(
+        item, created = CartProduct.objects.update_or_create(
             cart=self,
             product=product,
             qty=qty,
             # unit_price=product.amount,
         )
+
+        return item
 
     @classmethod
     def create(cls, customer, product):
@@ -858,11 +860,13 @@ class CartProduct(CartInvoiceProduct):
     def save(self, *args, **kwargs):
         if not self.product:
             return
-        self.unit_price = self.product.amount
-        self.unit_gst = self.unit_price * settings.PRODUCT_GST_PERCENT / 100
-        self.amount = self.qty * self.unit_price
-        self.gst = self.qty * self.unit_gst
-        self.total_amount = self.amount + self.gst
+
+        if settings.CART_INVOICE_ITEM_CALC_BY_CHILD == False:
+            self.unit_price = self.product.amount
+            self.unit_gst = self.unit_price * settings.PRODUCT_GST_PERCENT / 100
+            self.amount = self.qty * self.unit_price
+            self.gst = self.qty * self.unit_gst
+            self.total_amount = self.amount + self.gst
 
         if not self.sac_code:
             self.sac_code = self.product.sac_code
