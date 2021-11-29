@@ -112,10 +112,7 @@
            onclick="plan_click({{ plan.id }})"
            data-id="{{ plan.id }}"
            data-description="{{ plan.description }}"
-           data-amount="{{ plan.amount }}"
-           data-minutes="{{ plan.minutes_included }}"
-           data-agents="{{ plan.agents_included }}"
-           data-call_recording="{{ plan.call_recording_included }}">
+           data-amount="{{ plan.amount }}">
 
         <div class="card-body">
           <div class="card-title">{{ plan.description }}</div>
@@ -143,7 +140,6 @@
           </div>
           <div class="agent_{{ products.agent.id }}"
                data-id="{{ products.agent.id }}"
-               data-agents="{{ products.agent.agents_included }}"
                data-amount="{{ products.agent.amount }}">
             <table class="table table-sm table-borderless table-extra py-0 my-0 w-100">
               <tbody>
@@ -174,7 +170,6 @@
           </div>
           <div class="recording_{{ products.recording.id }}"
                data-id="{{ products.recording.id }}"
-               data-call_recording="{{ products.recording.call_recording_included }}"
                data-amount="{{ products.recording.amount }}">
             <table class="table table-sm table-borderless table-extra py-0 my-0 w-100">
               <tbody>
@@ -196,36 +191,6 @@
       </div>
     </div>
 
-    <div class="col-lg-4 col-md-12 my-2">
-      <div class="card card-extra h-100">
-        <div class="card-body">
-          <div class="card-title">Minutes</div>
-
-          <table class="table table-sm table-borderless table-extra py-0 my-0 w-100">
-            <tbody>
-            {% for minute in products.minutes %}
-            <tr id="" class="d-flex minute_{{ minute.id }}"
-                 data-id="{{ minute.id }}"
-                 data-minutes="{{ minute.minutes_included }}"
-                 data-amount="{{ minute.amount }}">
-              <td class="text-left" style="width: 24px;"
-                  onclick="minutes_click({{ minute.id }}, 'add')">
-                <i class="fas fa-plus cursor-pointer"></i>
-              </td>
-              <td class="text-right" style="width: 100%;">{{ minute.minutes_included|qux_floatformat_in:0 }}</td>
-              <td class>@</td>
-              <td class="text-left" style="width: 100%;">₹{{ minute.amount|qux_floatformat_in:0 }}</td>
-              <td class="text-right" style="width: 24px;"
-                  onclick="minutes_click({{ minute.id }}, 'remove')">
-                <i class="fas fa-minus cursor-pointer"></i>
-              </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
   </div>
 
   <h3>Step 3: Checkout and Make Payment</h3>
@@ -256,14 +221,6 @@
         <td>Agents</td>
         <td class='item_included quantity'>-</td>
         <td class='item_added quantity'>-</td>
-        <td class='item_bonus quantity'>-</td>
-        <td class='item_total quantity'>-</td>
-        <td class='item_amount currency'>-</td>
-      </tr>
-      <tr class='for_minute'>
-        <td>Minutes</td>
-        <td class='item_included quantity'>-</td>
-        <td class="item_added quantity">-</td>
         <td class='item_bonus quantity'>-</td>
         <td class='item_total quantity'>-</td>
         <td class='item_amount currency'>-</td>
@@ -334,16 +291,6 @@
 
 let has_existing_paid_ivr = {{ has_existing_paid_ivr|yesno:"true,false" }};
 let disabled_plan_products = {{ disabled_plan_products|safe }};
-
-let minute_json = [];
-
-{% for minute in products.minutes %}
-  minute_json.push({
-    'id':{{ minute.id|safe }},
-    'amount':{{ minute.amount|safe }},
-    'minutes':{{ minute.minutes_included|safe }}
-  });
-{% endfor %}
 
 let cart_initial = {{ initial|safe }};
 cart_initial = cart_initial ? cart_initial : null;

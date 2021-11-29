@@ -778,32 +778,22 @@ class Product(CoreModel):
     amount = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     description = models.CharField(max_length=128, default=None, null=True, blank=True)
     category = models.CharField(max_length=16, choices=PRODUCT_CATEGORY)
-    minutes_included = models.IntegerField(default=0)
-    agents_included = models.IntegerField(default=0)
-    call_recording_included = models.BooleanField(default=False)
     monthly_validity = models.IntegerField(default=0)
     is_active = models.BooleanField(default=False, verbose_name='Active')
     expiry_date = models.DateField(**default_null_blank, verbose_name='Expiry Date')
     sac_code = models.CharField(max_length=6, **default_null_blank)
-    is_included = models.BooleanField(default=False)
     addon = models.ForeignKey("self", on_delete=models.CASCADE,
                               related_name="addons", **default_null_blank)
 
     class Meta:
         db_table = 'billing_product'
         unique_together = [
-            ('amount', 'is_included', 'category', 'minutes_included',
-             'agents_included', 'call_recording_included', 'monthly_validity', 'is_active')
+            ('amount', 'category',
+             'monthly_validity', 'is_active')
         ]
 
     def __str__(self):
         return '%s : %s : %s : %s' % (self.description, self.category, self.id, self.amount)
-
-    def save(self, *args, **kwargs):
-        if self.category.lower() == 'plan' and self.agents_included == 0:
-            self.agents_included = 1
-
-        super().save(*args, **kwargs)
 
     def total_amount(self):
         gst = self.amount * settings.PRODUCT_GST_PERCENT / 100
@@ -861,7 +851,7 @@ class CartProduct(CartInvoiceProduct):
         if not self.product:
             return
 
-        if settings.CART_INVOICE_ITEM_CALC_BY_CHILD == False:
+        if settings.CART_INVOICE_ITEM_CUSTOM_FIELD == False:
             self.unit_price = self.product.amount
             self.unit_gst = self.unit_price * settings.PRODUCT_GST_PERCENT / 100
             self.amount = self.qty * self.unit_price

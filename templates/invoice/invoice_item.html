@@ -71,7 +71,7 @@
             <div>Seller: <b>{{ invoice_seller.name }}</b></div>
             <div>{{ invoice_seller.address }}</div>
             {% if invoice_seller.gstin %}
-            <div>GSTIN: <span class="text-muted">27AACFZ2951K1ZS</span></div>
+            <div>GSTIN: <span class="text-muted">{{invoice_seller.gstin}}</span></div>
             {% endif %}
           </div>
 

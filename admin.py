@@ -5,10 +5,10 @@ from .models import *
 
 
 class ProductAdmin(CoreModelAdmin):
-    list_display = ('id', 'sku', 'amount', 'monthly_validity', 'minutes_included', 'agents_included', 'description',
-                    'category', 'is_active', 'call_recording_included', 'expiry_date', 'sac_code', 'is_included') + CoreModelAdmin.list_display
-    search_fields = ('id', 'sku', 'amount', 'monthly_validity', 'minutes_included', 'agents_included', 'description',
-                     'category', 'is_active', 'call_recording_included', 'expiry_date', 'sac_code', 'is_included')
+    list_display = ('id', 'sku', 'amount', 'monthly_validity', 'description',
+                    'category', 'is_active', 'expiry_date', 'sac_code') + CoreModelAdmin.list_display
+    search_fields = ('id', 'sku', 'amount', 'monthly_validity', 'description',
+                     'category', 'is_active', 'expiry_date', 'sac_code')
     raw_id_fields = ('addon', )
 
 

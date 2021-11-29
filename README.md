@@ -37,6 +37,7 @@ PRODUCT_GST_PERCENT = 18
 # 'RazorPay' OR 'Swipez'
 PAYMENT_PROVIDER = 'RazorPay'
 KYC_GST_PAN_REQUIRED = True
+CART_INVOICE_ITEM_CUSTOM_FIELD = True
 ON_PAYMENT_SUCCESS = 'payments.models.OnPaymentSuccess'
 
 SWIPEZ_SECRET_KEY = os.getenv('SWIPEZ_SECRET_KEY', None)
