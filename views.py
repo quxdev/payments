@@ -536,7 +536,7 @@ def cart_validation(request, ivrid: int):
 
 class KYCView(LoginRequiredMixin, SEOMixin, TemplateView):
     model = Customer
-    form_class = KYCForm if settings.KYC_GST_PAN_REQUIRED else ReqKYCForm
+    form_class = KYCForm if settings.KYC_GST_PAN_REQUIRED else ReqKYCForm if settings.SHIPPING_ADDRESS_REQUIRED else BaseKYCForm
     template_name = 'customer/kyc_form.html'
 
     def get_initial(self, request, user):
@@ -595,13 +595,17 @@ class KYCView(LoginRequiredMixin, SEOMixin, TemplateView):
         if userid and (user.is_staff or user.is_superuser):
             user = User.objects.get(pk=userid)
         initial = self.get_initial(request, user)
+
+        form = self.form_class(user, initial=initial)
+        # del form.fields["same_as_billing_address"]
+
         context_dict = {
             'form_title': 'KYC.',
             'submit_btn_text': 'Submit',
             'first_name': user.first_name,
             'last_name': user.last_name,
             'slug': initial.get('slug', None),
-            'form': self.form_class(user, initial=initial)
+            'form': form
         }
         return render(request, self.template_name, context=context_dict)
 

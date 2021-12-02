@@ -324,7 +324,7 @@ class PaymentForm(forms.Form):
     )
 
 
-class ReqKYCForm(forms.Form):
+class BaseKYCForm(forms.Form):
     def __init__(self, user, *args, **kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
@@ -416,6 +416,7 @@ class ReqKYCForm(forms.Form):
         max_length=128
     )
 
+class ReqKYCForm(BaseKYCForm):
     same_as_billing_address = forms.BooleanField(
         required=False,
         initial=True,
