@@ -1,19 +1,30 @@
-{% load static %} <!-- new -->
+{% extends 'forms/_form.html' %}
+{% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Django + Stripe Checkout</title>
-    <script src="https://js.stripe.com/v3/"></script>
-    <script src="{% static 'js/payments/stripe.js' %}"></script>   <!-- new -->
-  </head>
-  <body>
+{% block form_title %}Payment.{% endblock form_title %}
+
+{% block form_body %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Django + Stripe Checkout</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="{% static 'js/payments/stripe.js' %}"></script>   <!-- new -->
+
+  <input type="hidden" id="amount", name="amount" value="{{amount}}">
+  <input type="hidden" id="currency", name="currency" value="{{currency}}">
+  <input type="hidden" id="receipt", name="receipt" value="{{receipt}}">
   <section class="section">
     <div class="container">
-      <button class="button is-primary" id="submitBtn">Purchase!</button>
+      <button class="button is-primary payment-button" id="submitBtn">Pay with Stripe</button>
     </div>
   </section>
-  </body>
-</html>
+{% endblock %}
+
+{% block customjs %}
+{{ block.super }}
+  <script>
+    $(window).on('load', function() {
+     jQuery('.payment-button').click();
+    });
+  </script>
+{% endblock %}

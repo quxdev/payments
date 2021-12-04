@@ -378,7 +378,15 @@ class Cart(CartInvoice):
     def razorpay_payload(self):
         jsondata = {
             'amount': int(self.total_amount * 100),
-            'currency': 'INR',
+            'currency': settings.PAYMENT_CURRENCY,
+            'receipt': self.slug,
+        }
+        return jsondata
+
+    def stripe_payload(self):
+        jsondata = {
+            'amount': int(self.total_amount * 100),
+            'currency': settings.PAYMENT_CURRENCY,
             'receipt': self.slug,
         }
         return jsondata

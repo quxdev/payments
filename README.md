@@ -34,15 +34,24 @@ SITE_ID = 1
 TEAM_SALES = ['emailid_id@example.com']
 SERVICE_TEAM = ['emailid_id@example.com']
 PRODUCT_GST_PERCENT = 18
-# 'RazorPay' OR 'Swipez'
+# 'RazorPay' OR 'Swipez' or 'Stripe'
 PAYMENT_PROVIDER = 'RazorPay'
 KYC_GST_PAN_REQUIRED = True
 CART_INVOICE_ITEM_CUSTOM_FIELD = True
 SHIPPING_ADDRESS_REQUIRED = True
 ON_PAYMENT_SUCCESS = 'payments.models.OnPaymentSuccess'
 
+# Stripe
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', None)
+STRIPE_ENDPOINT_SECRET = os.getenv('STRIPE_ENDPOINT_SECRET', None)
+STRIPE_DOMAIN_URL = 'http://localhost:8000/'
+
+# Swipez
 SWIPEZ_SECRET_KEY = os.getenv('SWIPEZ_SECRET_KEY', None)
 SWIPEZ_MODE = os.getenv('SWIPEZ_MODE', 'TEST')
+
+PAYMENT_CURRENCY = 'USD';
 
 INVOICE_SELLER = {
     'name': 'Name',

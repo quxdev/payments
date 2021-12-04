@@ -5,6 +5,14 @@ from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from stripe.error import SignatureVerificationError
+from django.shortcuts import render
+
+
+def stripe_create_order(request, jsondata, action_url):
+    jsondata.update({
+        'action_url': action_url
+    })
+    return render(request, "merchants/stripe/home.html", jsondata)
 
 
 class HomePageView(TemplateView):
@@ -31,7 +39,7 @@ def stripe_config(request):
 @csrf_exempt
 def create_checkout_request(request):
     if request.method == 'GET':
-        domain_url = 'http://localhost:8080/'
+        domain_url = settings.STRIPE_DOMAIN_URL
         stripe.api_key = settings.STRIPE_SECRET_KEY
         try:
             # Create new Checkout Session for the order
@@ -49,17 +57,23 @@ def create_checkout_request(request):
 
             # ?session_id={CHECKOUT_SESSION_ID} means the redirect will have the
             # session ID set as a query param
+            amount = request.GET.get('amount')
+            currency = request.GET.get('currency')
+            # receipt is cart slug/id
+            receipt = request.GET.get('receipt')
+
             checkout_session = stripe.checkout.Session.create(
-                success_url=domain_url + 'payments/success?session_id={CHECKOUT_SESSION_ID}',
-                cancel_url=domain_url + 'payments/cancelled/',
+                client_reference_id=receipt,
+                success_url=domain_url + 'payments/stripe/success?session_id={CHECKOUT_SESSION_ID}',
+                cancel_url=domain_url + 'payments/stripe/cancelled/',
                 payment_method_types=['card'],
                 mode='payment',
                 line_items=[
                     {
-                        'name': 'Personal',
+                        'name': 'Cart',
                         'quantity': 1,
-                        'currency': 'inr',
-                        'amount': '50000',
+                        'currency': currency,
+                        'amount': amount,
                     }
                 ]
             )
@@ -74,21 +88,24 @@ def stripe_webook(request):
     endpoint_secret = settings.STRIPE_ENDPOINT_SECRET
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    event = None
 
     try:
         event = stripe.Webhook.construct_event(
             payload, sig_header, endpoint_secret
         )
-    except ValueError:
+    except ValueError as e:
         # Invalid payload
         return HttpResponse(status=400)
-    except SignatureVerificationError:
+    except stripe.error.SignatureVerificationError as e:
         # Invalid signature
         return HttpResponse(status=400)
 
     # Handle the checkout.session.completed event
-    if event and event['type'] == 'checkout.session.completed':
+    if event['type'] == 'checkout.session.completed':
+        print("Payment was successful. session.completed")
         # TODO: run some custom code here
-        print("Payment was successful.")
+        print('payload checkout.session.completed =', payload)
+        print('event checkout.session.completed =', event)
 
     return HttpResponse(status=200)

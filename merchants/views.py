@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .razorpay.views import razorpay_create_order
 from .razorpay.views import razorpay_verify_signature
+from .stripe.views import stripe_create_order
 from .swipez.views import swipez_payment
 from .swipez.views import swipez_payment_payload
 from .swipez.views import swipez_webhook_payload
@@ -106,6 +107,11 @@ def getpaid(request, slug: str):
         rawdata = cart.razorpay_payload()
         action_url = reverse('customer:webhook', kwargs={'reference': rawdata['receipt']})
         return razorpay_create_order(request, rawdata, action_url)
+
+    elif settings.PAYMENT_PROVIDER == 'Stripe':
+        rawdata = cart.stripe_payload()
+        action_url = reverse('customer:webhook', kwargs={'reference': rawdata['receipt']})
+        return stripe_create_order(request, rawdata, action_url)
 
 
 @csrf_exempt

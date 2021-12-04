@@ -3,6 +3,7 @@ import razorpay
 import hmac
 import hashlib
 
+from django.conf import settings
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -57,7 +58,7 @@ def razorpay_verify_signature(razorpay_order_id, razorpay_payment_id, razorpay_s
 
 def razorpay_payment(request):
     amount = 100  # 100 here means 1 dollar,1 rupree if currency INR
-    jsondata = {'amount': amount, 'currency': 'INR', 'receipt': 'invoice003'}
+    jsondata = {'amount': amount, 'currency': settings.PAYMENT_CURRENCY, 'receipt': 'invoice003'}
     action_url = reverse('razorpay:payment-success')
     return razorpay_create_order(request, jsondata, action_url)
 
