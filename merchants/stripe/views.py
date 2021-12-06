@@ -2,11 +2,13 @@ import stripe
 from django.conf import settings
 from django.http.response import HttpResponse
 from django.http.response import JsonResponse
+from django.http import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from stripe.error import SignatureVerificationError
 from django.shortcuts import render
-
+from django.utils import timezone
+from ...models import *
 
 def stripe_create_order(request, jsondata, action_url):
     jsondata.update({
@@ -108,4 +110,58 @@ def stripe_webook(request):
         print('payload checkout.session.completed =', payload)
         print('event checkout.session.completed =', event)
 
+        payment_data = event['data']['object']
+        cart_slug = payment_data['client_reference_id']
+
+        return webhook_process(request, cart_slug, payment_data)
+
     return HttpResponse(status=200)
+
+
+def webhook_process(request, cart_slug, payment_data):
+    data = {
+        'invoice': None,
+        'payment': None,
+        'reference': cart_slug,
+        'error': None
+    }
+
+    cart = Cart.objects.get_or_none(slug=cart_slug)
+    if cart is None:
+        data['error'] = 'PaymentNotFound'
+        return render(request, 'merchants/failure.html', data)
+
+    invoice = Invoice.create(cart)
+
+    payment = Payment.create(invoice)
+    if payment is None:
+        data['error'] = 'PaymentNotFound'
+        return render(request, 'merchants/failure.html', data)
+
+    data['slug'] = payment.invoice.slug
+    if payment.is_processed:
+        data['payment'] = model_to_dict(payment, exclude=['id', 'post_dict', 'new_object_id'])
+        data['invoice'] = model_to_dict(payment.invoice)
+        data['error'] = 'InvoiceIsPaid'
+        return render(request, 'merchants/failure.html', data)
+
+    # Stripe
+    payment.post_dict.update(payment_data)
+    payment.save()
+
+    is_paid = payment_data['payment_status'] == 'paid'
+    print('is_paid =', is_paid)
+    if is_paid:
+        payment.is_processed = True
+        payment.payment_date = timezone.now().today()
+        # payment.paid_amount = Decimal(request.POST.get('amount', 0))
+        payment.save()
+    else:
+        data['error'] = 'ChecksumFailed'
+
+    data['payment'] = model_to_dict(payment, exclude=['id', 'post_dict', 'new_object_id'])
+    data['invoice'] = model_to_dict(payment.invoice)
+
+    # return render(request, 'merchants/failure.html', data)
+    send_email_for_payment(payment)
+    return HttpResponseRedirect(reverse('customer:invoice_detail', kwargs={'slug': invoice.slug}))
