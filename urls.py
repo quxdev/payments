@@ -26,7 +26,7 @@ urlpatterns = [
     path('invoice/<str:slug>/edit/', InvoiceUpdateView.as_view(), name='invoice_edit'),
     path('invoice/<str:slug>/', InvoiceDetailView.as_view(), name='invoice_detail'),
 
-    path('cart/', CartListView.as_view(), name='cart_home'),
+    path('cart-list/', CartListView.as_view(), name='cart_home'),
     path('cart/new/', CartCreateView.as_view(), name='cart_new'),
     re_path('cart/(?:(?P<pk>[0-9]+)/)?', CartItemPage.as_view(), name='cart_edit'),
 
