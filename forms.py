@@ -67,18 +67,12 @@ class AddressForm(forms.ModelForm):
     )
 
 
-class CustomerForm(forms.ModelForm):
+class BaseCustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
         fields = [
-            'name', 'contact_name', 'primary_contact', 'billing_address', 'shipping_address',
-            'phone', 'email', 'gstin', 'pan'
+            'name', 'contact_name', 'primary_contact', 'billing_address', 'phone', 'email'
         ]
-        # widgets = {
-        #     'users': forms.SelectMultiple(attrs={
-        #         'class': 'form-control foo-border'
-        #     })
-        # }
 
     name = forms.CharField(
         label='Company Name',
@@ -111,14 +105,6 @@ class CustomerForm(forms.ModelForm):
         })
     )
 
-    shipping_address = forms.ModelChoiceField(
-        required=False,
-        queryset=Address.objects.all(),
-        widget=forms.Select(attrs={
-            'class': 'form-control foo-border custom-select'
-        })
-    )
-
     phone = forms.CharField(
         label='Phone',
         widget=forms.TextInput(attrs={
@@ -134,6 +120,37 @@ class CustomerForm(forms.ModelForm):
             'placeholder': 'Enter Email'
         })
     )
+
+
+class ReqCustomerForm(BaseCustomerForm):
+    class Meta:
+        model = Customer
+        fields = [
+            'name', 'contact_name', 'primary_contact', 'billing_address', 'shipping_address',
+            'phone', 'email'
+        ]
+
+    shipping_address = forms.ModelChoiceField(
+        required=False,
+        queryset=Address.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'form-control foo-border custom-select'
+        })
+    )
+
+
+class CustomerForm(ReqCustomerForm):
+    class Meta:
+        model = Customer
+        fields = [
+            'name', 'contact_name', 'primary_contact', 'billing_address', 'shipping_address',
+            'phone', 'email', 'gstin', 'pan'
+        ]
+        # widgets = {
+        #     'users': forms.SelectMultiple(attrs={
+        #         'class': 'form-control foo-border'
+        #     })
+        # }
 
     gstin = forms.CharField(
         required=False,
@@ -152,13 +169,6 @@ class CustomerForm(forms.ModelForm):
             'placeholder': 'Enter PAN'
         })
     )
-
-    # users = forms.MultipleChoiceField(
-    #     # queryset=User.objects.all(),
-    #     widget=forms.SelectMultiple(attrs={
-    #         'class': 'form-control foo-border'
-    #     })
-    # )
 
 
 class InvoiceForm(forms.ModelForm):
@@ -415,6 +425,7 @@ class BaseKYCForm(forms.Form):
         }),
         max_length=128
     )
+
 
 class ReqKYCForm(BaseKYCForm):
     same_as_billing_address = forms.BooleanField(

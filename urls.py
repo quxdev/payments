@@ -10,7 +10,7 @@ urlpatterns = [
     path('', PaymentHome.as_view(), name='home'),
 
     path('product/<str:productsku>/payment/', getitem, name='buyitem'),
-    path('cart/<str:slug>/payment/', getpaid, name='payment'),
+    path('mycart/<str:slug>/payment/', getpaid, name='payment'),
     path('payment/webhook/<str:reference>/', webhook, name='webhook'),
 
     path('address/', AddressListView.as_view(), name='address_home'),
@@ -27,7 +27,7 @@ urlpatterns = [
     path('invoice/<str:slug>/', InvoiceDetailView.as_view(), name='invoice_detail'),
 
     path('cart-list/', CartListView.as_view(), name='cart_home'),
-    path('cart/new/', CartCreateView.as_view(), name='cart_new'),
+    path('cart-new/', CartCreateView.as_view(), name='cart_new'),
     re_path('cart/(?:(?P<pk>[0-9]+)/)?', CartItemPage.as_view(), name='cart_edit'),
 
     # for customer
@@ -47,7 +47,7 @@ urlpatterns = [
          getaddress_by_user, name='address_by_user'),
     path('product-by-id/<int:product_id>/',
          getproduct_by_id, name='product_by_id'),
-    path('cart-validation/<int:ivrid>/',
+    path('cart-validation/<int:customer_id>/',
          cart_validation, name='cart_validation'),
     path('customer-autocomplete/', getcustomers, name='customer-autocomplete'),
 

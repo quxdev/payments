@@ -153,7 +153,7 @@ class CustomerListView(LoginRequiredMixin, PermissionRequiredMixin,
 class CustomerCreateView(LoginRequiredMixin, PermissionRequiredMixin,
                          CreateView):
     model = Customer
-    form_class = CustomerForm
+    form_class = CustomerForm if settings.KYC_GST_PAN_REQUIRED else ReqCustomerForm if settings.SHIPPING_ADDRESS_REQUIRED else BaseCustomerForm
     template_name = 'customer/customer_form.html'
     permission_required = ('customer.add_customer', )
     extra_context = {
@@ -174,7 +174,7 @@ class CustomerCreateView(LoginRequiredMixin, PermissionRequiredMixin,
 class CustomerUpdateView(LoginRequiredMixin, PermissionRequiredMixin,
                          UpdateView):
     model = Customer
-    form_class = CustomerForm
+    form_class = CustomerForm if settings.KYC_GST_PAN_REQUIRED else ReqCustomerForm if settings.SHIPPING_ADDRESS_REQUIRED else BaseCustomerForm
     template_name = 'customer/customer_form.html'
     permission_required = ('customer.change_customer',)
 
@@ -508,9 +508,8 @@ def getproduct_by_id(request, product_id: int):
 
 @login_required
 @csrf_exempt
-def cart_validation(request, ivrid: int):
-    user = request.user
-    ivr = IVRConfig.getbyid(user, ivrid)
+def cart_validation(request, customer_id: int):
+    customer = Customer.objects.get(pk=customer_id)
 
     check_for = request.POST.get('check_for')
     products = request.POST.getlist('products', [])
@@ -522,12 +521,16 @@ def cart_validation(request, ivrid: int):
 
     json_data = {}
     if check_for == 'has-paid-plan':
-        has_active_paid_ivr = ivr.config_type.name != 'free' \
-            and (ivr.end_date is None or ivr.end_date >= timezone.now().date())
+        has_active_paid = InvoiceProduct.objects.filter(
+            invoice__customer=customer,
+            product__category__iexact='plan',
+            product__amount__gte=1,
+            invoice__payment__is_processed=True
+        ).exists()
 
         paid_item_selected = products_qr.filter(amount__gte=1).exists()
 
-        json_data['paid_plan_found'] = has_active_paid_ivr or paid_item_selected
+        json_data['paid_plan_found'] = has_active_paid or paid_item_selected
     elif check_for == 'has-more-plan-item':
         json_data['has_more_plan_item'] = True if products_qr.count() >= 2 else False
 
@@ -792,7 +795,7 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
 
         # get last paid plan
         last_plan_prod = InvoiceProduct.objects.filter(
-            # ivr=ivr,
+            invoice__customer__primary_contact=user,
             product__category__iexact='plan',
             product__amount__gte=1,
             invoice__payment__is_processed=True

@@ -1,5 +1,5 @@
 {% extends 'forms/_form.html' %}
-{% load static %}
+{% load static qux quxform %}
 
 {% block stylesheets %}
   {{ block.super }}
@@ -45,7 +45,7 @@
     {% include 'forms/_hfields.html' %}
 
     <br>
-    <legend>IVR / Products</legend>
+    <legend>Products</legend>
     <table class="table">
         {{ items.management_form }}
 
@@ -121,28 +121,6 @@
 
 {% block customjs %}
 <script type="text/javascript">
-    function change_ivr_list(customer, last=false){
-        let url = "/customer/ivr-by-customer/" + customer + "/";
-        $.ajax({
-          url: url,
-          type: 'get',
-          success:function(data) {
-            // ^= start with and $= end with
-            var $el = $( "select[name^='items-'][name$='-ivr']" );
-            if (last == true){
-                $el = $el.last();
-            }
-            $el.empty(); // remove old options
-
-            var values = data.data;
-            values.forEach((item) => {
-                $el.append($("<option></option>").attr("value", item.id).text(item.ivr));
-            });
-
-          }
-        });
-    }
-
     $(document).ready(function () {
         // $('#id_customer').select2(); // without ajax
 
@@ -169,17 +147,17 @@
             prefix: '{{ items.prefix }}'
         });
 
-        var customer = $('#id_customer').val();
-        if (customer){
-            change_ivr_list(customer);
-        }
-
-        $('.add-row').click(function () {
-            var customer = $('#id_customer').val();
-            if (customer){
-                change_ivr_list(customer, true);
-            }
-        });
+        // var customer = $('#id_customer').val();
+        // if (customer){
+        //     change_ivr_list(customer);
+        // }
+        //
+        // $('.add-row').click(function () {
+        //     var customer = $('#id_customer').val();
+        //     if (customer){
+        //         change_ivr_list(customer, true);
+        //     }
+        // });
 
         $('.delete-row').click(function () {
             change_total_amount();
@@ -189,10 +167,10 @@
 
     });
 
-    $('#id_customer').change(function () {
-        var customer = this.value;
-        change_ivr_list(customer);
-    });
+    // $('#id_customer').change(function () {
+    //     var customer = this.value;
+    //     change_ivr_list(customer);
+    // });
 
     function change_total_amount(){
         var sum = 0;
@@ -228,10 +206,11 @@
         var product = this.value;
         let amt_tg = $(this).closest("tr").find("input[name^='items-'][name$='-unit_price']");
         let gst_tg = $(this).closest("tr").find("input[name^='items-'][name$='-unit_gst']");
-        let ivr_tg = $(this).closest("tr").find("select[name^='items-'][name$='-ivr']").find(":selected");
         let delete_tg = $(this).closest("tr").find("a[class='delete-row']");
 
-        let url = "/customer/product-by-id/" + product + "/";
+        let url = "{% url 'customer:product_by_id' 9876543210 %}";
+        url = url.replace('9876543210', product);
+
         $.ajax({
           url: url,
           type: 'get',
@@ -253,9 +232,9 @@
                   }
               }
 
-              var ivrid = ivr_tg.val();
+              var customer_id = $('#id_customer').val();
               let url = "{% url 'customer:cart_validation' '987654321' %}";
-              url = url.replace('987654321', ivrid);
+              url = url.replace('987654321', customer_id);
 
               let formData = new FormData();
               $("select[name^='items-'][name$='-product']:visible").each(function() {

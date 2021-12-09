@@ -62,11 +62,23 @@
         },
         minimumInputLength: 1,
       });
+
+      var user_id = $('#id_primary_contact').val();
+      if(user_id != '' && user_id != undefined){
+        change_address_list(user_id);
+      }
+
     });
 
     $('#id_primary_contact').change(function () {
       var user_id = this.value;
-      let url = "/customer/address-by-user/" + user_id + "/";
+      change_address_list(user_id);
+    });
+
+    function change_address_list(user_id){
+      let url = "{% url 'customer:address_by_user' 9876543210 %}";
+      url = url.replace('9876543210', user_id);
+
       $.ajax({
         url: url,
         type: 'get',
@@ -89,6 +101,6 @@
 
         },
       });
-    });
+    }
   </script>
 {% endblock %}

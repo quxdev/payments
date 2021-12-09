@@ -178,7 +178,8 @@
         let amt_tg = $(this).closest("tr").find("input[name^='items-'][name$='-amount']");
         let gst_tg = $(this).closest("tr").find("input[name^='items-'][name$='-gst']");
 
-        let url = "/customer/product-by-id/" + product + "/";
+        let url = "{% url 'customer:product_by_id' 9876543210 %}";
+        url = url.replace('9876543210', product);
         $.ajax({
           url: url,
           type: 'get',

@@ -66,7 +66,8 @@
 
 
     function change_cart_list(customer, last=false){
-        let url = "/customer/open-cart-by-customer/" + customer + "/";
+        let url = "{% url 'customer:open_cart_by_customer' 9876543210 %}";
+        url = url.replace('9876543210', customer);
         $.ajax({
           url: url,
           type: 'get',

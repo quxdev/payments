@@ -401,9 +401,9 @@ class Cart(CartInvoice):
         all_values['user_phone'] = {'label': "User Phone",
                                     'value': self.customer.phone}
 
-        if not self.invoice_date:
+        if not self.invoice_date and 'invoice_date' in all_values:
             del all_values['invoice_date']
-        if not self.due_date:
+        if not self.due_date and 'due_date' in all_values:
             del all_values['due_date']
 
         return all_values
@@ -571,9 +571,9 @@ class Invoice(CartInvoice):
         slug_url = f'{get_current_domain()}{reverse("customer:invoice_detail", args=(self.slug,))}'
         all_values['slug'] = {'label': "URL", 'value': slug_url}
 
-        if not self.invoice_date:
+        if not self.invoice_date and 'invoice_date' in all_values:
             del all_values['invoice_date']
-        if not self.due_date:
+        if not self.due_date and 'due_date' in all_values:
             del all_values['due_date']
 
         return all_values
