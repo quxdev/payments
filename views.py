@@ -237,6 +237,8 @@ class InvoiceCreateView(LoginRequiredMixin, PermissionRequiredMixin,
             if items.is_valid():
                 items.instance = self.object
                 items.save()
+            else:
+                print('----items.errors----', items.errors)
 
         return super().form_valid(form)
 
@@ -363,7 +365,7 @@ class PaymentCreateView(LoginRequiredMixin,
 
 class PaymentUpdateView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
     model = Payment
-    form_class = PaymentForm
+    form_class = UpdatePaymentForm
     template_name = 'payment/payment_form.html'
     permission_required = ('customer.change_payment', )
 
@@ -376,7 +378,8 @@ class PaymentUpdateView(LoginRequiredMixin, PermissionRequiredMixin, TemplateVie
         initial['cart'] = payment.invoice.cart.id
 
         form = self.form_class(initial=initial)
-        form.fields['cart'].queryset = Cart.objects.filter(id=payment.invoice.cart.id)
+        if 'cart' in form.fields:
+            form.fields['cart'].queryset = Cart.objects.filter(id=payment.invoice.cart.id)
 
         context_dict = {
             'form_title': 'Update Payment',
@@ -479,14 +482,21 @@ def getopen_cart_by_customer(request, customer_id: int):
 
 
 @login_required
-def getaddress_by_user(request, user_id: int):
+def getuserdetails(request, user_id: int):
     if not request.user.is_superuser:
         return
+
+    user = User.objects.get(pk=user_id)
 
     address = Address.objects.filter(user=user_id).order_by('-id')
     address_data = list(address.values('id', 'address', 'city'))
 
-    return JsonResponse({'data': address_data})
+    json_data = {
+        'addresses': address_data,
+        'phone': user.profile.phone,
+        'email': user.email,
+    }
+    return JsonResponse(json_data)
 
 
 @login_required

@@ -224,14 +224,39 @@ class InvoiceForm(forms.ModelForm):
     # )
 
 
+class ProductModelChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        label = '%s (%s) at %s' % (obj.description, obj.category, round(obj.amount, 2))
+        if obj.addon:
+            label += ' (Add-On of '+obj.addon.description+')'
+        return label
+
+
 class InvoiceProductForm(forms.ModelForm):
     class Meta:
         model = InvoiceProduct
-        exclude = ()
+        # exclude = ()
+        fields = ['product', 'amount', 'gst', 'qty']
 
-    product = forms.ModelChoiceField(
+    def save(self, commit=True):
+        instance = super(InvoiceProductForm, self).save(commit=False)
+
+        instance.unit_price = instance.product.amount
+        instance.unit_gst = instance.unit_price * settings.PRODUCT_GST_PERCENT / 100
+        instance.amount = instance.qty * instance.unit_price
+        instance.gst = instance.qty * instance.unit_gst
+        instance.total_amount = instance.amount + instance.gst
+
+        if not instance.sac_code:
+            instance.sac_code = instance.product.sac_code
+
+        instance.save()
+        return instance
+
+    product = ProductModelChoiceField(
         required=False,
-        queryset=Product.objects.filter(is_active=True),
+        queryset=Product.objects.filter(is_active=True).order_by(
+            '-category', 'addon', 'amount', 'id'),
         widget=forms.Select(attrs={
             'class': 'form-control foo-border custom-select'
         })
@@ -253,36 +278,32 @@ class InvoiceProductForm(forms.ModelForm):
         })
     )
 
+    qty = forms.IntegerField(
+        initial=1,
+        label='Quantity',
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control foo-border',
+            'placeholder': 'Quantity',
+            'min': '1',
+        })
+    )
+
 
 InvoiceProductFormSet = inlineformset_factory(
     Invoice, InvoiceProduct, form=InvoiceProductForm,
-    fields=['product', 'amount', 'gst'], extra=1, can_delete=True
+    fields=['product', 'amount', 'gst', 'qty'], extra=1, can_delete=True
 )
 
-
 # class PaymentForm(forms.ModelForm):
-class PaymentForm(forms.Form):
+
+
+class UpdatePaymentForm(forms.Form):
     class Meta:
         model = Payment
         fields = [
-            'customer', 'cart', 'payment_date', 'payment_mode', 'payment_source',
+            'payment_date', 'payment_mode', 'payment_source',
             'paid_amount', 'source_reference', 'is_processed'
         ]
-
-    customer = forms.ModelChoiceField(
-        required=False,
-        queryset=Customer.objects.all(),
-        widget=forms.Select(attrs={
-            'class': 'form-control foo-border custom-select'
-        })
-    )
-
-    cart = forms.ModelChoiceField(
-        queryset=Cart.objects.all(),
-        widget=forms.Select(attrs={
-            'class': 'form-control foo-border custom-select'
-        })
-    )
 
     payment_date = forms.DateField(
         label='Payment Date',
@@ -331,6 +352,30 @@ class PaymentForm(forms.Form):
         required=False,
         label='Is Processed/Paid',
         widget=forms.CheckboxInput()
+    )
+
+
+class PaymentForm(UpdatePaymentForm):
+    class Meta:
+        model = Payment
+        fields = [
+            'customer', 'cart', 'payment_date', 'payment_mode', 'payment_source',
+            'paid_amount', 'source_reference', 'is_processed'
+        ]
+
+    customer = forms.ModelChoiceField(
+        required=False,
+        queryset=Customer.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'form-control foo-border custom-select'
+        })
+    )
+
+    cart = forms.ModelChoiceField(
+        queryset=Cart.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'form-control foo-border custom-select'
+        })
     )
 
 
@@ -587,14 +632,6 @@ class CartCustomerForm(forms.ModelForm):
         model = Cart
         fields = []
         # fields = ['slug']
-
-
-class ProductModelChoiceField(forms.ModelChoiceField):
-    def label_from_instance(self, obj):
-        label = '%s (%s) at %s' % (obj.description, obj.category, round(obj.amount, 2))
-        if obj.addon:
-            label += ' (Add-On of '+obj.addon.description+')'
-        return label
 
 
 class CartProductForm(forms.ModelForm):

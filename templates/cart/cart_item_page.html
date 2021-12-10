@@ -258,6 +258,7 @@
     </div>
   </div>
 
+  {% if not cart or cart.is_open %}
   <div class="row mt-4">
     <div class="col-12 col-md-6">
       <button type="submit" class="btn btn-primary btn-block py-2" name="submit" value="submit">
@@ -275,6 +276,8 @@
       </button>
     </div>
   </div>
+  {% endif %}
+
 </form>
 {% endblock form_body %}
 

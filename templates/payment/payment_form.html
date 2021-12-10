@@ -19,7 +19,8 @@
       </div>
     </div>
 {% endif %}
-<form method="post">
+<form {% if submit_btn_text == "Update" %}onsubmit="return confirm('Do you really want to update payment data?');"{% endif %}
+  method="post">
   {% csrf_token %}
 
     {% include 'forms/_hfields.html' %}

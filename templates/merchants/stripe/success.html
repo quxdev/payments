@@ -1,13 +1,10 @@
-<html lang="en">
-<head>
-  <title>Checkout - Thanks!</title>
-</head>
-<body>
-<section>
-  <p>
-    We appreciate your business! If you have any questions, please email
-    <a href="mailto:orders@example.com">orders@example.com</a>.
-  </p>
-</section>
-</body>
-</html>
+{% extends 'forms/form.html' %}
+{% load static %}
+
+{% block form_title %}Payment successfull{% endblock %}
+
+{% block form_body %}
+  <p>Thank you for your purchase</p>
+  <p><a style="color:red" href="/">Click here<a/> to continue to your account.</p>
+
+{% endblock %}

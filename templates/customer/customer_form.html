@@ -76,7 +76,7 @@
     });
 
     function change_address_list(user_id){
-      let url = "{% url 'customer:address_by_user' 9876543210 %}";
+      let url = "{% url 'customer:user-details' 9876543210 %}";
       url = url.replace('9876543210', user_id);
 
       $.ajax({
@@ -86,7 +86,7 @@
           var $el = $("#id_billing_address");
           $el.empty(); // remove old options
 
-          var values = data.data;
+          var values = data.addresses;
           values.forEach((item) => {
             $el.append($("<option></option>").attr("value", item.id).text(item.address));
           });
@@ -94,10 +94,18 @@
           var $el = $("#id_shipping_address");
           $el.empty(); // remove old options
 
-          var values = data.data;
+          var values = data.addresses;
           values.forEach((item) => {
             $el.append($("<option></option>").attr("value", item.id).text(item.address));
           });
+
+          if(data.phone){
+            $('#id_phone').val(data.phone);
+          }
+
+          if(data.email){
+            $('#id_email').val(data.email);
+          }
 
         },
       });

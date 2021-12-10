@@ -1,10 +1,10 @@
-<html lang="en">
-<head>
-  <title>Checkout – Cancelled</title>
-</head>
-<body>
-<section>
+{% extends 'forms/form.html' %}
+{% load static %}
+
+{% block form_title %}Payment failed{% endblock %}
+
+{% block form_body %}
   <p>Forgot to add something to your cart? Shop around then come back to pay!</p>
-</section>
-</body>
-</html>
+  <p><a style="color:red" href="/">Click here<a/> to continue to your account.</p>
+
+{% endblock %}

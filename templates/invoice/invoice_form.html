@@ -42,7 +42,7 @@
     {% include 'forms/_hfields.html' %}
 
     <br>
-    <legend>IVR / Products</legend>
+    <legend>Products</legend>
     <table class="table">
         {{ items.management_form }}
 
@@ -98,28 +98,6 @@
 
 {% block customjs %}
 <script type="text/javascript">
-    function change_ivr_list(customer, last=false){
-        let url = "/customer/ivr-by-customer/" + customer + "/";
-        $.ajax({
-          url: url,
-          type: 'get',
-          success:function(data) {
-            // ^= start with and $= end with
-            var $el = $( "select[name^='items-'][name$='-ivr']" );
-            if (last == true){
-                $el = $el.last();
-            }
-            $el.empty(); // remove old options
-
-            var values = data.data;
-            values.forEach((item) => {
-                $el.append($("<option></option>").attr("value", item.id).text(item.ivr));
-            });
-
-          }
-        });
-    }
-
     $(document).ready(function () {
         // $('#id_customer').select2(); // without ajax
 
@@ -146,24 +124,24 @@
             prefix: '{{ items.prefix }}'
         });
 
-        var customer = $('#id_customer').val();
-        if (customer){
-            change_ivr_list(customer);
-        }
-
-        $('.add-row').click(function () {
-            var customer = $('#id_customer').val();
-            if (customer){
-                change_ivr_list(customer, true);
-            }
-        });
+        // var customer = $('#id_customer').val();
+        // if (customer){
+        //     change_ivr_list(customer);
+        // }
+        //
+        // $('.add-row').click(function () {
+        //     var customer = $('#id_customer').val();
+        //     if (customer){
+        //         change_ivr_list(customer, true);
+        //     }
+        // });
 
     });
 
-    $('#id_customer').change(function () {
-        var customer = this.value;
-        change_ivr_list(customer);
-    });
+    // $('#id_customer').change(function () {
+    //     var customer = this.value;
+    //     change_ivr_list(customer);
+    // });
 
     // $('#id_customer').on("select2:select", function(e) {
     //     var customer = $('#id_customer').val();
