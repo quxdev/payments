@@ -98,9 +98,11 @@ def stripe_webook(request):
         )
     except ValueError as e:
         # Invalid payload
+        print('stripe Invalid payload')
         return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError as e:
         # Invalid signature
+        print('stripe Invalid signature')
         return HttpResponse(status=400)
 
     # Handle the checkout.session.completed event

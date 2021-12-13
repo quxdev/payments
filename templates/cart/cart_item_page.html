@@ -1,4 +1,4 @@
-{% extends 'forms/_form.html' %}
+{% extends '_blank.html' %}
 {% load static qux quxform %}
 
 {% block stylesheets %}
@@ -13,6 +13,8 @@
   h3 {
     font-size: 1.25rem;
     font-weight: 500;
+    margin-top: 1rem;
+    font-weight: bold;
   }
   .qux-content {
       background-color: rgb(239, 241, 245);
@@ -30,10 +32,12 @@
   }
   .card {
       border-radius: 8px;
-      border: 0;
+      /* border: 0; */
+      border-width:5px;
+      border-style:solid;
   }
   .card-body {
-      padding: 1rem;
+      padding: 2rem;
       border: none;
   }
   .card-extra .card-body {
@@ -44,9 +48,9 @@
     padding-left: 0.75rem;
     padding-right: 0.75rem;
   }
-  .table {
+  /* .table {
     font-size: 0.875rem;
-  }
+  } */
   .table thead th {
     border-top: 0;
     border-bottom: 0;
@@ -79,207 +83,142 @@
     text-align: right;
   }
   .disabled-effect {
-    pointer-events: none;
+    /* pointer-events: none; */
     opacity: 0.4;
-}
+  }
+  .currency_sum, .bold {
+    font-weight: bold;
+  }
+  .step_2_title {
+    padding-top: 3rem;
+  }
 </style>
 {% endblock customstyle %}
 
-{% comment %}
-{% block form_title %}{{ form_title }}{% endblock %}
-{% endcomment %}
 
-{% block form_body %}
+{% block rawcontent %}
+  {{ block.super }}
 
-{% if messages %}
-  <div class="row">
-    <div class="col">
-      {% for m in messages %}
-        <p class="lead">{{ m }}</p>
-      {% endfor %}
-    </div>
-  </div>
-{% endif %}
+  <div class="container-md">
+    <div class="form-container p-md-4">
+      <h1 class="py-4">
+        {{ form_title }}
+      </h1>
 
-<form method="post" id="form">
-{% csrf_token %}
-  <h3>Step 1: Choose your plan</h3>
+      {% if messages %}
+          <div class="row">
+            <div class="col">
+              {% for m in messages %}
+                <p class="lead">{{ m }}</p>
+              {% endfor %}
+            </div>
+          </div>
+      {% endif %}
 
-  <div class="row choose_plan">
-    {% for plan in products.plan %}
-    <div class="col-lg-4 col-md-12 my-2 {% if plan.id in disabled_plan_products %}disabled-effect{% endif %}">
-      <div class="card h-100 plan_{{ plan.id }}"
-           onclick="plan_click({{ plan.id }})"
-           data-id="{{ plan.id }}"
-           data-description="{{ plan.description }}"
-           data-amount="{{ plan.amount }}">
+      <form method="post" id="form">
+      {% csrf_token %}
+        <h3>Step 1: Choose your plan</h3>
 
-        <div class="card-body">
-          <div class="card-title">{{ plan.description }}</div>
-          <span class="font-weight-bold">₹{{ plan.amount|qux_floatformat_in:0 }}</span> per
-          {% if plan.monthly_validity == 12 %}year
-          {% elif plan.monthly_validity == 1 %}month
-          {% else %}{{ plan.monthly_validity }}month
-          {% endif %}
+        <div class="row choose_plan">
+          {% for plan in products.plan %}
+          <div class="col-lg-4 col-md-12 my-2 {% if plan.id in disabled_plan_products %}disabled-effect{% endif %}">
+            <div class="card h-100 plan_{{ plan.id }}"
+                 onclick="plan_click({{ plan.id }})"
+                 data-id="{{ plan.id }}"
+                 data-description="{{ plan.description }}"
+                 data-amount="{{ plan.amount }}">
+
+              <div class="card-body">
+                <div class="card-title">{{ plan.description }}</div>
+                <span class="font-weight-bold">${{ plan.amount|qux_floatformat_in:0 }}</span> per
+                {% if plan.monthly_validity == 12 %}year
+                {% elif plan.monthly_validity == 1 %}month
+                {% else %}{{ plan.monthly_validity }}month
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
         </div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
 
-  <!-- Extras -->
-  <h3>Step 2: Extras</h3>
+        <h3 class="step_2_title">Step 2: Checkout and Make Payment</h3>
 
-  <div class="row">
-    <div class="col-lg-4 col-md-12 my-2">
-      <div class="card card-extra h-100">
-        <div class="card-body">
-          <div class="card-title">
-            Users
-            <span class='float-right text-muted'>₹{{ products.agent.amount|qux_floatformat_in:0 }} per year</span>
-          </div>
-          <div class="agent_{{ products.agent.id }}"
-               data-id="{{ products.agent.id }}"
-               data-amount="{{ products.agent.amount }}">
-            <table class="table table-sm table-borderless table-extra py-0 my-0 w-100">
-              <tbody>
-              <tr class="d-flex">
-                <td class="text-left" style="width: 24px;"
-                    onclick="agent_click({{ products.agent.id }}, 'add')">
-                  <i class="fas fa-plus cursor-pointer"></i>
-                </td>
-                <td class="px-2" style="width: 100%;">Users</td>
-                <td class="text-right" style="width: 24px;"
-                    onclick="agent_click({{ products.agent.id }}, 'remove')">
-                    <i class="fas fa-minus cursor-pointer"></i>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
+        <div class="my-3">
+          <table class="table table-sm checkout_table" style="table-layout: fixed;">
+            <thead class="thead-light">
+            <tr>
+              <th scope="col">ITEM</th>
+              <th scope="col" class="text-center">QTY</th>
+              <th scope="col" class="text-right">AMOUNT</th>
+            </tr>
+            </thead>
 
-    <div class="col-lg-4 col-md-12 my-2">
-      <div class="card card-extra h-100">
-        <div class="card-body">
-          <div class="card-title">
-            Features
-            <span class='float-right text-muted'>₹{{ products.recording.amount|qux_floatformat_in:0 }} per year</span>
-          </div>
-          <div class="recording_{{ products.recording.id }}"
-               data-id="{{ products.recording.id }}"
-               data-amount="{{ products.recording.amount }}">
-            <table class="table table-sm table-borderless table-extra py-0 my-0 w-100">
-              <tbody>
-              <tr class="d-flex">
-                <td class="text-left" style="width: 24px;"
-                    onclick="recording_click({{ products.recording.id }}, 'add')">
-                    <i class="fas fa-plus cursor-pointer"></i>
-                </td>
-                <td class="px-2" style="width: 100%;">Recording</td>
-                <td class="text-right" style="width: 24px;"
-                    onclick="recording_click({{ products.recording.id }}, 'remove')">
-                    <i class="fas fa-minus cursor-pointer"></i>
-                </td>
-              </tr>
-              </tbody>
-            </table>
+            <tbody>
+            <tr class='for_plan'>
+              <td>Product (<span class="product_name"></span>)</td>
+              <td class='text-center'>
+                <input type="number" class="item_added_qty quantity"
+                id="qty" name="qty" style="width: 5em"
+                min="1" value="1" onchange="change_plan_qty(value)">
+              </td>
+              <td class='item_amount currency'>-</td>
+            </tr>
+            <tr class='for_plan'>
+              <td><b>Total</b></td>
+              <td class='text-center'>
+              </td>
+              <td class='currency total currency_sum'>-</td>
+            </tr>
+
+            </tbody>
+          </table>
+
+          <!-- <div class="row my-1">
+            <div class="col-6 offset-md-7 col-md-3">Total</div>
+            <div class="col-6 col-md-2 currency">
+              <span id="total" class="total currency_sum" style="padding-right: 0.3em;">-</span>
+            </div>
+          </div> -->
+
+          <!-- <div class="row my-1">
+            <div class="col-6 offset-md-7 col-md-3">GST (18%)</div>
+            <div class="col-6 col-md-2 currency">
+              <span id="gst" class="gst currency_sum" style="padding-right: 0.3em;">-</span>
+            </div>
+          </div> -->
+
+          <div class="row my-1">
+            <div class="col-6 offset-md-7 col-md-3"><b>Balance Due</b></div>
+            <div class="col-6 col-md-2 currency">
+              <span id="balance_due" class="balance_due currency_sum" style="padding-right: 0.3em;">-</span>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
-  </div>
+        {% if not cart or cart.is_open %}
+        <div class="row mt-4">
+          <div class="col-12 col-md-6">
+            <button type="submit" class="btn btn-primary btn-block py-2" name="submit" value="submit">
+              {% if submit_btn_text %}
+                {{ submit_btn_text }}
+              {% else %}
+                Submit
+              {% endif %}
+            </button>
+          </div>
 
-  <h3>Step 3: Checkout and Make Payment</h3>
-
-  <div class="my-3">
-    <table class="table table-sm checkout_table" style="table-layout: fixed;">
-      <thead class="thead-light">
-      <tr>
-        <th scope="col">Item</th>
-        <th scope="col" class="text-right">Included</th>
-        <th scope="col" class="text-right">Added</th>
-        <th scope="col" class="text-right">Bonus</th>
-        <th scope="col" class="text-right">Total</th>
-        <th scope="col" class="text-right">Amount</th>
-      </tr>
-      </thead>
-
-      <tbody>
-      <tr class='for_plan'>
-        <td>Plan</td>
-        <td class='item_included quantity'>-</td>
-        <td class='item_added quantity'>-</td>
-        <td class='item_bonus quantity'>-</td>
-        <td class='item_total quantity'>-</td>
-        <td class='item_amount currency'>-</td>
-      </tr>
-      <tr class='for_agent'>
-        <td>Agents</td>
-        <td class='item_included quantity'>-</td>
-        <td class='item_added quantity'>-</td>
-        <td class='item_bonus quantity'>-</td>
-        <td class='item_total quantity'>-</td>
-        <td class='item_amount currency'>-</td>
-      </tr>
-      <tr class='for_recording'>
-        <td>Recording</td>
-        <td class='item_included quantity'>False</td>
-        <td class='item_added quantity'>False</td>
-        <td class='item_bonus quantity'>False</td>
-        <td class='item_total quantity'>False</td>
-        <td class='item_amount currency'>-</td>
-      </tr>
-      </tbody>
-    </table>
-
-    <div class="row my-1">
-      <div class="col-6 offset-md-7 col-md-3">Total</div>
-      <div class="col-6 col-md-2 currency">
-        <span id="total" class="total currency_sum" style="padding-right: 0.3em;">-</span>
-      </div>
-    </div>
-
-    <div class="row my-1">
-      <div class="col-6 offset-md-7 col-md-3">GST (18%)</div>
-      <div class="col-6 col-md-2 currency">
-        <span id="gst" class="gst currency_sum" style="padding-right: 0.3em;">-</span>
-      </div>
-    </div>
-
-    <div class="row my-1">
-      <div class="col-6 offset-md-7 col-md-3">Balance Due</div>
-      <div class="col-6 col-md-2 currency">
-        <span id="balance_due" class="balance_due currency_sum" style="padding-right: 0.3em;">-</span>
-      </div>
-    </div>
-  </div>
-
-  {% if not cart or cart.is_open %}
-  <div class="row mt-4">
-    <div class="col-12 col-md-6">
-      <button type="submit" class="btn btn-primary btn-block py-2" name="submit" value="submit">
-        {% if submit_btn_text %}
-          {{ submit_btn_text }}
-        {% else %}
-          Submit
+          <div class="col-12 col-md-6 my-4 my-md-0">
+            <button type="submit" class="btn btn-primary btn-block py-2" name="submit" value="payment">
+              Save + Pay
+            </button>
+          </div>
+        </div>
         {% endif %}
-      </button>
-    </div>
 
-    <div class="col-12 col-md-6 my-4 my-md-0">
-      <button type="submit" class="btn btn-primary btn-block py-2" name="submit" value="payment">
-        Save + Pay
-      </button>
+      </form>
     </div>
   </div>
-  {% endif %}
-
-</form>
-{% endblock form_body %}
+{% endblock rawcontent %}
 
 
 {% block javascript %}
@@ -292,7 +231,7 @@
 {% block customjs %}
 <script type="text/javascript">
 
-let has_existing_paid_ivr = {{ has_existing_paid_ivr|yesno:"true,false" }};
+// let has_existing_paid_ivr = {{ has_existing_paid_ivr|yesno:"true,false" }};
 let disabled_plan_products = {{ disabled_plan_products|safe }};
 
 let cart_initial = {{ initial|safe }};
@@ -301,7 +240,7 @@ cart_initial = cart_initial ? cart_initial : null;
 let qty, fn;
 for (let cat in cart_initial) {
   for (let id in cart_initial[cat]) {
-    qty = cart_initial[cat][id];
+    qty = cart_initial[cat][id]['qty'];
     fn = window[cat + '_click'];
     fn(id, 'add', qty);
   }

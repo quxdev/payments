@@ -21,6 +21,32 @@ from qux.seo.mixin import SEOMixin
 from .models import *
 
 
+def default_n_disable_plan_products(user):
+    plan_products = Product.plan_queryset()
+
+    # get last paid plan
+    last_plan_prod = InvoiceProduct.objects.filter(
+        invoice__customer__primary_contact=user,
+        product__category__iexact='plan',
+        product__amount__gte=1,
+        invoice__payment__is_processed=True
+    ).order_by('id').last()
+
+    last_plan_product_id = None
+    if last_plan_prod and plan_products.filter(id=last_plan_prod.product.id).exists():
+        last_plan_product_id = last_plan_prod.product.id
+
+    disabled_plan_products = []
+    if last_plan_product_id:
+        for plan_product in plan_products:
+            if plan_product.id == last_plan_product_id:
+                break
+            else:
+                disabled_plan_products.append(plan_product.id)
+
+    return last_plan_product_id, disabled_plan_products
+
+
 class PaymentHome(LoginRequiredMixin, SEOMixin, TemplateView):
     template_name = 'home.html'
     extra_context = {
@@ -759,7 +785,7 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
     model = Cart
     template_name = 'cart/cart_item_page.html'
     extra_context = {
-        'form_title': None,
+        'form_title': 'Cart',
         'submit_btn_text': 'Save'
     }
 
@@ -795,33 +821,14 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
     def get_json_data(self):
         user = self.request.user
 
-        products = Product.objects.filter(is_active=True)\
-            .order_by('-category', 'addon', 'amount', 'id')
+        products = Product.default_queryset()
 
         cart = self.get_object()
         print('cart id =', cart.id)
 
-        plan_products = products.filter(category="plan")
+        plan_products = Product.plan_queryset()
 
-        # get last paid plan
-        last_plan_prod = InvoiceProduct.objects.filter(
-            invoice__customer__primary_contact=user,
-            product__category__iexact='plan',
-            product__amount__gte=1,
-            invoice__payment__is_processed=True
-        ).order_by('id').last()
-
-        last_plan_product_id = None
-        if last_plan_prod and plan_products.filter(id=last_plan_prod.product.id).exists():
-            last_plan_product_id = last_plan_prod.product.id
-
-        disabled_plan_products = []
-        if last_plan_product_id:
-            for plan_product in plan_products:
-                if plan_product.id == last_plan_product_id:
-                    break
-                else:
-                    disabled_plan_products.append(plan_product.id)
+        last_plan_product_id, disabled_plan_products = default_n_disable_plan_products(user)
 
         data = {
             "cart": cart,
@@ -838,21 +845,13 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
 
         checkout_json = {
             "plan": {},
-            "minutes": {},
-            "agent": {},
-            "recording": {}
         }
 
         for item in cart.items.all():
             key = item.product.id
             category = item.product.category.lower()
-            if category in ["plan", "minutes"]:
-                checkout_json[category][key] = item.qty
-            elif category == "feature":
-                if "recording" in item.product.description.lower():
-                    checkout_json["recording"][key] = item.qty
-                elif "agent" in item.product.description.lower():
-                    checkout_json["agent"][key] = item.qty
+            if category in ["plan"]:
+                checkout_json[category][key] = {"qty": item.qty}
 
         # if plan is not added in cart then add default plan product check if no paid plan exists with ivr
         if len(checkout_json["plan"]) == 0:
@@ -874,7 +873,7 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
                 plan_product_id = plan_products.last().id
 
             if plan_product_id:
-                checkout_json["plan"][plan_product_id] = 1
+                checkout_json["plan"][plan_product_id] = {"qty": 1}
 
         data["initial"] = checkout_json
         print("checkout_json =", checkout_json)
@@ -901,9 +900,10 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
         cart.items.all().delete()
 
         for cat, val in data.items():
-            for p_id, qty in val.items():
+            for p_id, jsn in val.items():
+                qty = jsn["qty"]
                 product = Product.objects.get(pk=p_id)
-                cart.create_item(
+                item = cart.create_item(
                     # ivr,
                     product,
                     qty

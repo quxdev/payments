@@ -803,6 +803,16 @@ class Product(CoreModel):
     def __str__(self):
         return '%s : %s : %s : %s' % (self.description, self.category, self.id, self.amount)
 
+    @classmethod
+    def default_queryset(cls):
+        return Product.objects.filter(is_active=True).order_by('-category', 'addon', 'amount', 'id')
+
+    @classmethod
+    def plan_queryset(cls):
+        products = cls.default_queryset()
+
+        return products.filter(category="plan")
+
     def total_amount(self):
         gst = self.amount * settings.PRODUCT_GST_PERCENT / 100
         total_amount = self.amount + gst
