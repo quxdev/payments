@@ -28,7 +28,7 @@ INSTALLED_APPS += [
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = [
     ('css', os.path.join(BASE_DIR, "qux/static/css")),
-    # payments/common/js is for Cart
+    # payments/common/js is for Cart and Stripe payment
     ('js', os.path.join(BASE_DIR, "payments/common/js")),
 ]
 
@@ -81,9 +81,6 @@ from django.urls import path
 from django.urls import include
 urlpatterns += [
     path('billing/', include('payments.urls')),
-
-    # add this url if stripe payment gateway is being used
-    path('payments/stripe/', include('payments.merchants.stripe.urls')),
 ]
 ```
 
@@ -100,19 +97,31 @@ urlpatterns += [
 ]
 ```
 
-# small stripe configuration
+# Note for stripe configuration
 Ref - https://testdriven.io/blog/django-stripe-tutorial/
 ```sh
-# For Production url : https://dashboard.stripe.com/apikeys
+# Use `Test mode` On/Off button for test and production environment
+# For Production server, url : https://dashboard.stripe.com/apikeys
 STRIPE_PUBLISHABLE_KEY="Publishable key"
 STRIPE_SECRET_KEY="Secret key"
-# for localhost
+# from webhook url detail click on `Signing secret`
 STRIPE_ENDPOINT_SECRET="Signing secret from webhook detail page"
 
 
-# For Dev url : https://dashboard.stripe.com/test/apikeys
+# For Dev server use test account, url : https://dashboard.stripe.com/test/apikeys
 STRIPE_PUBLISHABLE_KEY="Publishable key"
 STRIPE_SECRET_KEY="Secret key"
-# for webhook url detail
+# from webhook url detail click on `Signing secret`
 STRIPE_ENDPOINT_SECRET="Signing secret from webhook detail page"
+
+
+# For Local server use test account, url : https://dashboard.stripe.com/test/apikeys
+STRIPE_PUBLISHABLE_KEY="Publishable key"
+STRIPE_SECRET_KEY="Secret key"
+# for localhost: Download "Stripe CLI" from https://stripe.com/docs/stripe-cli#install url
+# On login you will get secret endpoint key which you need to add in below variable
+STRIPE_ENDPOINT_SECRET="Signing secret from webhook detail page"
+# use below command in terminal at stripe package path to test localhost payment checkout
+# while testing you need to `disable` test webhook urls from https://dashboard.stripe.com/test/webhooks
+./stripe listen --forward-to localhost:8000/billing/stripe/webhook/
 ```

@@ -807,9 +807,6 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
             return HttpResponseRedirect(reverse('customer:account_kyc')+nextitem)
 
         if not self.get_object():
-            # ivrid = IVRConfig.getivr_id(user)
-            # payload = {'ivrid': ivrid, 'create_with_no_item': True}
-            # result = create_subscription_cart(payload)
             customer = get_customer(user)
             cart, created = Cart.objects.get_or_create(
                 is_open=True,
@@ -853,7 +850,7 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
             if category in ["plan"]:
                 checkout_json[category][key] = {"qty": item.qty}
 
-        # if plan is not added in cart then add default plan product check if no paid plan exists with ivr
+        # if plan is not added in cart then add default plan product check if no paid plan exists with customer
         if len(checkout_json["plan"]) == 0:
             plan_product_id = None
             # choose last purchased plan if exists
@@ -862,11 +859,9 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
 
             # choose plan product based on category if exists
             if not plan_product_id:
-                ivr_config_product = plan_products.filter(
-                    # config_type=ivr.config_type
-                ).order_by('id').last()
-                if ivr_config_product:
-                    plan_product_id = ivr_config_product.id
+                config_product = plan_products.order_by('id').last()
+                if config_product:
+                    plan_product_id = config_product.id
 
             # choose last plan product
             if not plan_product_id and plan_products:
@@ -904,7 +899,6 @@ class CartItemPage(LoginRequiredMixin, SEOMixin, TemplateView):
                 qty = jsn["qty"]
                 product = Product.objects.get(pk=p_id)
                 item = cart.create_item(
-                    # ivr,
                     product,
                     qty
                 )

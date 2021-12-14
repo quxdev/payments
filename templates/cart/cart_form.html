@@ -147,18 +147,6 @@
             prefix: '{{ items.prefix }}'
         });
 
-        // var customer = $('#id_customer').val();
-        // if (customer){
-        //     change_ivr_list(customer);
-        // }
-        //
-        // $('.add-row').click(function () {
-        //     var customer = $('#id_customer').val();
-        //     if (customer){
-        //         change_ivr_list(customer, true);
-        //     }
-        // });
-
         $('.delete-row').click(function () {
             change_total_amount();
         });
@@ -166,11 +154,6 @@
         change_total_amount();
 
     });
-
-    // $('#id_customer').change(function () {
-    //     var customer = this.value;
-    //     change_ivr_list(customer);
-    // });
 
     function change_total_amount(){
         var sum = 0;
@@ -298,11 +281,5 @@
 
     });
 
-    // $('#id_customer').on("select2:select", function(e) {
-    //     var customer = $('#id_customer').val();
-    //     if (customer){
-    //         change_ivr_list(customer);
-    //     }
-    // });
 </script>
 {% endblock %}

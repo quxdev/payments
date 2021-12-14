@@ -38,8 +38,6 @@ def getitem(request, productsku: str):
             customer_obj.users.add(user)
             customer_obj.save()
 
-    # invoice_obj = Invoice.create(customer_obj, product, ivr)
-    # return getpaid(request, invoice_obj.slug)
     cart_obj = Cart.get_cart_object(customer_obj)
     if cart_obj:
         cart_obj.create_item(product)

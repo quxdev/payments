@@ -307,28 +307,28 @@ class Cart(CartInvoice):
     def update_amount(self):
         self.amount = 0
         self.gst = 0
-        for ivrpro in self.items.all():
-            self.amount += ivrpro.amount
-            self.gst += ivrpro.gst
+        for item_obj in self.items.all():
+            self.amount += item_obj.amount
+            self.gst += item_obj.gst
 
         self.save()
 
     def reset_addon(self):
         # remove those addon whose parent not added
-        for ivrpro in self.items.all():
-            if ivrpro.product.addon:
-                if not self.items.filter(product=ivrpro.product.addon).exists():
-                    ivrpro.delete()
+        for item_obj in self.items.all():
+            if item_obj.product.addon:
+                if not self.items.filter(product=item_obj.product.addon).exists():
+                    item_obj.delete()
 
     def reset_minute_feature_plan(self):
         # remove minutes if paid plan is not exists
-        for ivrpro in self.items.all():
-            if ivrpro.product.category in ['minutes', 'feature']:
+        for item_obj in self.items.all():
+            if item_obj.product.category in ['minutes', 'feature']:
                 has_plan_item = self.items.filter(
                     product__category='plan', amount__gte=1
                 ).exists()
                 if not has_plan_item:
-                    ivrpro.delete()
+                    item_obj.delete()
 
     def reset_to_one_plan(self):
         plan_items = self.items.filter(product__category='plan').order_by('dtm_updated')
@@ -516,9 +516,9 @@ class Invoice(CartInvoice):
     def update_amount(self):
         self.amount = 0
         self.gst = 0
-        for ivrpro in self.items.all():
-            self.amount += ivrpro.amount
-            self.gst += ivrpro.gst
+        for item_obj in self.items.all():
+            self.amount += item_obj.amount
+            self.gst += item_obj.gst
 
         self.save()
 
@@ -794,7 +794,6 @@ class Product(CoreModel):
                               related_name="addons", **default_null_blank)
 
     class Meta:
-        db_table = 'billing_product'
         unique_together = [
             ('amount', 'category',
              'monthly_validity', 'is_active')
@@ -817,32 +816,6 @@ class Product(CoreModel):
         gst = self.amount * settings.PRODUCT_GST_PERCENT / 100
         total_amount = self.amount + gst
         return total_amount
-
-    @classmethod
-    def initdata(cls):
-        data = [
-            ['IVR00001', 0, 'Free', 'plan'],
-            ['IVR00002', 125, 'Voicemail', 'plan'],
-            ['IVR00003', 375, 'Essential', 'plan'],
-            ['IVR00004', 7500, 'Everything', 'plan'],
-            ['IVR00005', 500, 'Combo500', 'plan'],
-            ['IVR90001', 3000, 'Unlimited', 'plan'],
-            ['MIN00010', 125, '100 Minutes', 'minutes'],
-            ['MIN00040', 500, '400 Minutes', 'minutes'],
-            ['MIN00100', 1000, '1,000 Minutes', 'minutes'],
-            ['MIN00400', 3000, '4,000 Minutes', 'minutes'],
-            ['MIN01000', 5000, '10,000 Minutes', 'minutes'],
-            ['FEAT0001', 375, 'Additional Agent', 'feature'],
-            ['FEAT0002', 375, 'Call Recording', 'feature']
-        ]
-
-        for item in data:
-            obj = cls()
-            obj.sku = item[0]
-            # obj.price = item[1]
-            obj.description = item[2]
-            obj.category = item[3]
-            obj.save()
 
 
 class CartInvoiceProduct(CoreModel):
@@ -893,7 +866,6 @@ class CartProduct(CartInvoiceProduct):
         all_values['description'] = {
             'label': "Product Description", 'value': self.product.description}
         all_values['category'] = {'label': "Product Category", 'value': self.product.category}
-        # all_values['ivr'] = {'label': "IVR", 'value': self.ivr.name}
 
         return all_values
 
@@ -912,7 +884,6 @@ class InvoiceProduct(CartInvoiceProduct):
     invoice = models.ForeignKey(Invoice, on_delete=models.DO_NOTHING, related_name='items')
 
     class Meta:
-        db_table = 'billing_invoice_ivr_product'
         verbose_name = 'Invoice Detail'
 
     def __str__(self):

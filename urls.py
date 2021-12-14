@@ -1,5 +1,6 @@
-from django.urls import path
+from django.urls import path, include
 from django.urls import re_path
+from django.conf import settings
 
 from .views import *
 from .merchants.views import *
@@ -54,3 +55,8 @@ urlpatterns = [
     path('user-autocomplete', UserAutocomplete.as_view(), name='user-autocomplete'),
 
 ]
+
+if settings.PAYMENT_PROVIDER.lower() == 'Stripe'.lower():
+    urlpatterns += [
+        path('stripe/', include('payments.merchants.stripe.urls')),
+    ]
