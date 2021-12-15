@@ -1,0 +1,2 @@
+razorpay==1.2.0
+stripe==2.63.0
