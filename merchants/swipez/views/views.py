@@ -18,7 +18,7 @@ def swipez_payment(data):
     # without user access
 
     session = requests.session()
-    session.headers.update({'referer': 'blacklab.app'})
+    session.headers.update({'referer': 'qux.dev'})
     r = session.post(data['url'], data['payload'])
     print(r.content)
     return HttpResponse(r.content)

@@ -50,18 +50,14 @@ def getitem(request, productsku: str):
 
 
 def send_email_on_payment_visit(cart):
-    # subject = "New Payment visit cart: " + str(cart.slug)
+    subject = "New Payment visit cart: " + str(cart.slug)
+    message = cart.to_text()
 
-    # message = cart.to_text()
-
-    # json_data = {
-    #     'targets': settings.TEAM_SALES,
-    #     'subject': subject,
-    #     'message': message,
-    #     'sender': 'no-reply@blacklab.app',
-    # }
-
-    # create_async_task('core.comm.tasks.send_async_email', json_data)
+    email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL,
+                         settings.TEAM_SALES)
+    email.content_subtype = 'html'
+    res = email.send()
+    print('send_email_on_payment_visit res =', res)
 
     pass
 

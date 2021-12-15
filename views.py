@@ -136,6 +136,7 @@ class InvoiceDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['invoice_seller'] = settings.INVOICE_SELLER
+        context['KYC_GST_PAN_REQUIRED'] = getattr(settings, 'KYC_GST_PAN_REQUIRED', True)
 
         return context
 

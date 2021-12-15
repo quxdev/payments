@@ -19,6 +19,7 @@ from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.template import Context, loader, Template
 from django.contrib.sites.models import Site
+from django.core.mail import EmailMessage
 
 from qux.utils.phone import phone_number
 from qux.utils.date import eomonth
@@ -27,7 +28,7 @@ from qux.models import CoreModel, CoreModelPlus, default_null_blank
 
 def get_current_domain():
     current_site = Site.objects.get_current()
-    domain = f"https://{current_site.domain}"  # 'https://blacklab.app'
+    domain = f"https://{current_site.domain}"  # 'https://qux.dev'
     if '127.0.0.1:8000' in domain:
         domain = f"http://{current_site.domain}"
     return domain
@@ -165,21 +166,15 @@ class Customer(CoreModel):
         all_values = super().to_dict(verbose_name=True, exclude=exclude)
 
         slug_url = f'{get_current_domain()}{reverse("customer:customer_edit", args=(self.slug,))}'
-        all_values['slug'] = {'label': "URL", 'value': slug_url}
-        all_values['primary_contact'] = {
-            'label': "Primary Contact", 'value': self.primary_contact.email
-        }
+        all_values['url'] = slug_url
+        all_values['primary_contact'] = self.primary_contact.email
 
         if self.gstin:
-            all_values['gstin'] = {
-                'label': "GST",
-                'value': self.gstin + ' ' + ('Verified' if self.gstin_verified else 'Not Verified')
-            }
+            all_values['gstin'] = self.gstin + ' ' + \
+                ('Verified' if self.gstin_verified else 'Not Verified')
         elif self.pan:
-            all_values['pan'] = {
-                'label': "PAN",
-                'value': self.pan + ' ' + ('Verified' if self.pan_verified else 'Not Verified')
-            }
+            all_values['pan'] = self.pan + ' ' + \
+                ('Verified' if self.pan_verified else 'Not Verified')
 
         return all_values
 
@@ -201,7 +196,10 @@ class Customer(CoreModel):
 
 @receiver(post_save, sender=Customer)
 def customer_postsave(sender, instance, created, **kwargs):
-    if instance.pan and instance.old_pan != instance.pan and instance.old_pan in ['', None]:
+    if not settings.KYC_GST_PAN_REQUIRED and created:
+        send_email_on_new_customer(instance)
+
+    elif instance.pan and instance.old_pan != instance.pan and instance.old_pan in ['', None]:
         send_email_on_new_customer(instance)
 
 
@@ -210,15 +208,13 @@ def send_email_on_new_customer(customer_obj):
 
     message = customer_obj.to_text()
 
-    json_data = {
-        'targets': settings.TEAM_SALES,
-        'subject': subject,
-        'message': message,
-        'sender': 'no-reply@blacklab.app',
-    }
+    email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL,
+                         settings.TEAM_SALES)
+    email.content_subtype = 'html'
+    res = email.send()
+    print('send_email_on_new_customer res =', res)
 
-    # create_async_task('core.comm.tasks.send_async_email', json_data)
-    return False
+    return True
 
 
 class CartInvoice(CoreModel):
@@ -396,10 +392,8 @@ class Cart(CartInvoice):
                    'customer']
 
         all_values = super().to_dict(verbose_name=True, exclude=exclude)
-        all_values['user_email'] = {'label': "User Email",
-                                    'value': self.customer.primary_contact.email}
-        all_values['user_phone'] = {'label': "User Phone",
-                                    'value': self.customer.phone}
+        all_values['user_email'] = self.customer.primary_contact.email
+        all_values['user_phone'] = self.customer.phone
 
         if not self.invoice_date and 'invoice_date' in all_values:
             del all_values['invoice_date']
@@ -425,7 +419,7 @@ class Cart(CartInvoice):
         for item in self.items.all():
             item_data = item.to_data()
             email_data['data'].append({
-                'title': f'Cart Item - {item_data["product"]["value"]}',
+                'title': f'Cart Item - {item_data["product"]}',
                 'all_values': item_data
             })
 
@@ -569,7 +563,7 @@ class Invoice(CartInvoice):
 
         all_values = super().to_dict(verbose_name=True, exclude=exclude)
         slug_url = f'{get_current_domain()}{reverse("customer:invoice_detail", args=(self.slug,))}'
-        all_values['slug'] = {'label': "URL", 'value': slug_url}
+        all_values['url'] = slug_url
 
         if not self.invoice_date and 'invoice_date' in all_values:
             del all_values['invoice_date']
@@ -674,7 +668,7 @@ class Payment(CoreModel):
 
         all_values = super().to_dict(verbose_name=True, exclude=exclude)
         slug_url = f'{get_current_domain()}{reverse("customer:payment_detail", args=(self.slug,))}'
-        all_values['slug'] = {'label': "URL", 'value': slug_url}
+        all_values['url'] = slug_url
 
         return all_values
 
@@ -699,7 +693,7 @@ class Payment(CoreModel):
         for item in self.invoice.cart.items.all():
             item_data = item.to_data()
             email_data['data'].append({
-                'title': f'Cart Item - {item_data["product"]["value"]}',
+                'title': f'Cart Item - {item_data["product"]}',
                 'all_values': item_data
             })
 
@@ -763,14 +757,12 @@ def send_email_for_payment(payment):
 
     message = payment.to_text()
 
-    json_data = {
-        'targets': settings.TEAM_SALES,
-        'subject': subject,
-        'message': message,
-        'sender': 'no-reply@blacklab.app',
-    }
+    email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL,
+                         settings.TEAM_SALES)
+    email.content_subtype = 'html'
+    res = email.send()
+    print('send_email_for_payment res =', res)
 
-    # create_async_task('core.comm.tasks.send_async_email', json_data)
     return False
 
 
@@ -862,10 +854,9 @@ class CartProduct(CartInvoiceProduct):
                    'unit_gst', 'description', 'cart', 'product']
 
         all_values = super().to_dict(verbose_name=True, exclude=exclude, exclude_none=True)
-        all_values['product'] = {'label': "Product", 'value': self.product.sku}
-        all_values['description'] = {
-            'label': "Product Description", 'value': self.product.description}
-        all_values['category'] = {'label': "Product Category", 'value': self.product.category}
+        all_values['product'] = self.product.sku
+        all_values['product description'] = self.product.description
+        all_values['product category'] = self.product.category
 
         return all_values
 

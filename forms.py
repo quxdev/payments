@@ -297,7 +297,7 @@ InvoiceProductFormSet = inlineformset_factory(
 # class PaymentForm(forms.ModelForm):
 
 
-class UpdatePaymentForm(forms.Form):
+class UpdatePaymentForm(forms.ModelForm):
     class Meta:
         model = Payment
         fields = [

@@ -117,7 +117,7 @@
         <tr>
           <th scope="col" class="">Product</th>
           <th scope="col" class="text-right" style="min-width: 40px;">Amount</th>
-          <th scope="col" class="text-right" style="min-width: 40px;">GST</th>
+          {% if KYC_GST_PAN_REQUIRED %}<th scope="col" class="text-right" style="min-width: 40px;">GST</th>{% endif %}
           <th scope="col" class="text-right" style="min-width: 40px;">Total</th>
         </tr>
         </thead>
@@ -126,7 +126,7 @@
           <tr>
             <td>{{ item.product.category|upper }} / {{ item.product.description }}</td>
             <td class="text-nowrap text-right">{{ item.amount | floatformat:2 }}</td>
-            <td class="text-nowrap text-right">{{ item.gst | floatformat:2 }}</td>
+            {% if KYC_GST_PAN_REQUIRED %}<td class="text-nowrap text-right">{{ item.gst | floatformat:2 }}</td>{% endif %}
             <td class="text-nowrap text-right">{{ item.amount | add:item.gst | floatformat:2 }}</td>
           </tr>
         {% endfor %}
@@ -135,7 +135,7 @@
         <tr>
           <th>Total</th>
           <th class="text-nowrap text-right">{{ object.amount | floatformat:2 }}</th>
-          <th class="text-nowrap text-right">{{ object.gst | floatformat:2 }}</th>
+          {% if KYC_GST_PAN_REQUIRED %}<th class="text-nowrap text-right">{{ object.gst | floatformat:2 }}</th>{% endif %}
           <th class="text-nowrap text-right">{{ object.amount | add:object.gst | floatformat:2 }}</th>
         </tr>
         </tfoot>

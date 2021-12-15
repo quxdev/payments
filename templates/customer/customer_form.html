@@ -7,6 +7,15 @@
   <link rel="stylesheet" href="{% static 'css/qux-select2.css' %}">
 {% endblock stylesheets %}
 
+{% block customstyle %}
+  {{ block.super }}
+  <style>
+  #form-container {
+    max-width: none;
+  }
+  </style>
+{% endblock customstyle %}
+
 {% block form_title %}{{ form_title }}{% endblock %}
 
 {% block form_body %}
