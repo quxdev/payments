@@ -208,11 +208,12 @@ def send_email_on_new_customer(customer_obj):
 
     message = customer_obj.to_text()
 
-    email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL,
-                         settings.TEAM_SALES)
-    email.content_subtype = 'html'
-    res = email.send()
-    print('send_email_on_new_customer res =', res)
+    if getattr(settings, 'PAYMENT_EMAIL_ON_NEW_CUSTOMER', True):
+        email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL,
+                             settings.TEAM_SALES)
+        email.content_subtype = 'html'
+        res = email.send()
+        print('send_email_on_new_customer res =', res)
 
     return True
 
@@ -757,13 +758,14 @@ def send_email_for_payment(payment):
 
     message = payment.to_text()
 
-    email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL,
-                         settings.TEAM_SALES)
-    email.content_subtype = 'html'
-    res = email.send()
-    print('send_email_for_payment res =', res)
+    if getattr(settings, 'PAYMENT_EMAIL_ON_NEW_PAYMENT', True):
+        email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL,
+                             settings.TEAM_SALES)
+        email.content_subtype = 'html'
+        res = email.send()
+        print('send_email_for_payment res =', res)
 
-    return False
+    return True
 
 
 class Product(CoreModel):

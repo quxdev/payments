@@ -25,7 +25,8 @@ def razorpay_create_order(request, jsondata, action_url):
     context = {
         'response': response,
         'key': os.getenv('RAZORPAY_KEY'),
-        'action_url': action_url
+        'action_url': action_url,
+        'logo_path': settings.LOGO_PATH
     }
     return render(request, "merchants/razorpay/razorpay_payment.html", context)
 

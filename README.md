@@ -42,6 +42,11 @@ KYC_GST_PAN_REQUIRED = True
 CART_INVOICE_ITEM_CUSTOM_FIELD = True
 SHIPPING_ADDRESS_REQUIRED = True
 ON_PAYMENT_SUCCESS = 'payments.models.OnPaymentSuccess'
+LOGO_PATH = 'logo/razorpay_4x1.svg'
+
+PAYMENT_EMAIL_ON_NEW_CUSTOMER = True
+PAYMENT_EMAIL_ON_NEW_PAYMENT = True
+PAYMENT_EMAIL_ON_PAYMENT_VISIT = True
 
 # Stripe
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
@@ -68,7 +73,9 @@ Create `project/project/.env` file and store these required variables
 ```sh
 export RAZORPAY_KEY="for-razorpay-payment-gateway"
 export RAZORPAY_SECRET="for-razorpay-payment-gateway"
+
 export SWIPEZ_SECRET_KEY="for-swipez-payment-gateway"
+
 export STRIPE_PUBLISHABLE_KEY="for-stripe-payment-gateway"
 export STRIPE_SECRET_KEY="for-stripe-payment-gateway"
 export STRIPE_ENDPOINT_SECRET="for-stripe-payment-gateway"

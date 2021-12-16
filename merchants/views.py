@@ -53,13 +53,14 @@ def send_email_on_payment_visit(cart):
     subject = "New Payment visit cart: " + str(cart.slug)
     message = cart.to_text()
 
-    email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL,
-                         settings.TEAM_SALES)
-    email.content_subtype = 'html'
-    res = email.send()
-    print('send_email_on_payment_visit res =', res)
+    if getattr(settings, 'PAYMENT_EMAIL_ON_PAYMENT_VISIT', True):
+        email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL,
+                             settings.TEAM_SALES)
+        email.content_subtype = 'html'
+        res = email.send()
+        print('send_email_on_payment_visit res =', res)
 
-    pass
+    return True
 
 
 # @login_required
