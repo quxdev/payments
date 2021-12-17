@@ -13,7 +13,7 @@ from django.urls import reverse
 
 
 def razorpay_get_client():
-    return razorpay.Client(auth=(os.getenv('RAZORPAY_KEY'), os.getenv('RAZORPAY_SECRET')))
+    return razorpay.Client(auth=(settings.RAZORPAY_KEY, settings.RAZORPAY_SECRET))
 
 
 def razorpay_create_order(request, jsondata, action_url):
@@ -24,7 +24,7 @@ def razorpay_create_order(request, jsondata, action_url):
 
     context = {
         'response': response,
-        'key': os.getenv('RAZORPAY_KEY'),
+        'key': settings.RAZORPAY_KEY,
         'action_url': action_url,
         'logo_path': settings.LOGO_PATH
     }
@@ -47,7 +47,7 @@ def razorpay_verify_signature(razorpay_order_id, razorpay_payment_id, razorpay_s
     message = razorpay_order_id + "|" + razorpay_payment_id
 
     signature = hmac.new(
-        bytes(os.getenv('RAZORPAY_SECRET'), 'latin-1'),
+        bytes(settings.RAZORPAY_SECRET, 'latin-1'),
         msg=bytes(message, 'latin-1'), digestmod=hashlib.sha256
     ).hexdigest()
 
