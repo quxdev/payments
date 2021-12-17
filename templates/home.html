@@ -1,40 +1,61 @@
 {% extends '_blank.html' %}
-{% load static qux quxform %}
+{% load static %}
 
 {% block rawcontent %}
-<div class="container-xl my-4">
-  <div id="cart_list" class="">
-
-    <h1 class="py-4">
-      Home
-    </h1>
-
-    <div class="qux-toc-item">
-      <ul class="fa-ul collapse show" id="collapse_log">
-        <li class="qux-toc-subitem">
-          <a href="{% url 'customer:address_home' %}">Address</a>
-        </li>
-        <li class="qux-toc-subitem">
-          <a href="{% url 'customer:customer_home' %}">Customer</a>
-        </li>
-        <li class="qux-toc-subitem">
-          <a href="{% url 'customer:cart_home' %}">Cart</a>
-        </li>
-        <li class="qux-toc-subitem">
-          <a href="{% url 'customer:invoice_home' %}">Invoices</a>
-        </li>
-        <li class="qux-toc-subitem">
-          <a href="{% url 'customer:payment_home' %}">Payment</a>
-        </li>
-      </ul>
+<div class="container">
+  <div class="row font-weight-bold px-n2">
+    <div class="col-12 p-2">
+      <div class="bg-light d-flex align-items-center p-3">
+        <div class="flex-grow-0">
+          <i class="fad fa-2x fa-fw fa-user"></i>
+        </div>
+        <div class="flex-grow-1 pl-3">
+          <a href="{% url 'customer:customer_home' %}">Customers</a>
+        </div>
+      </div>
     </div>
-
+  </div>
+  <div class="row font-weight-bold row-cols-1 row-cols-md-2 px-n2">
+    <div class="col p-2">
+      <div class="bg-light d-flex align-items-center p-3">
+        <div class="flex-grow-0">
+          <i class="fad fa-2x fa-fw fa-address-card"></i>
+        </div>
+        <div class="flex-grow-1 pl-3">
+          <a href="{% url 'customer:address_home' %}">Addresses</a>
+        </div>
+      </div>
+    </div>
+    <div class="col p-2">
+      <div class="bg-light d-flex align-items-center p-3">
+        <div class="flex-grow-0">
+          <i class="fad fa-2x fa-fw fa-shopping-cart"></i>
+        </div>
+        <div class="flex-grow-1 pl-3">
+          <a href="{% url 'customer:cart_home' %}">Carts</a>
+        </div>
+      </div>
+    </div>
+    <div class="col p-2">
+      <div class="bg-light d-flex align-items-center p-3">
+        <div class="flex-grow-0">
+          <i class="fad fa-2x fa-fw fa-receipt"></i>
+        </div>
+        <div class="flex-grow-1 pl-3">
+          <a href="{% url 'customer:invoice_home' %}">Invoices</a>
+        </div>
+      </div>
+    </div>
+    <div class="col p-2">
+      <div class="bg-light d-flex align-items-center p-3">
+        <div class="flex-grow-0">
+          <i class="fad fa-2x fa-fw fa-credit-card"></i>
+        </div>
+        <div class="flex-grow-1 pl-3">
+          <a href="{% url 'customer:payment_home' %}">Payments</a>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock rawcontent %}
-
-{% block customjs %}
-  <script>
-
-  </script>
-{% endblock %}

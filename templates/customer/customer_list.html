@@ -1,51 +1,25 @@
-{% extends '_blank.html' %}
+{% extends '_qux_payments_list.html' %}
 {% load static %}
 
-{% block stylesheets %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'css/listview.css' %}">
-{% endblock stylesheets %}
+{% block header_icon %}<i class="fad fa-fw fa-user-circle"></i>{% endblock %}
 
-{% block customstyle %}
-  {{ block.super }}
-{% endblock %}
+{% block header_text %}Customers{% endblock %}
 
-{% block rawcontent %}
-  {{ block.super }}
-
-  <div class="container-md">
-    <div class="form-container py-4 p-md-4">
-      <div class="form_prefix">
-        <span>
-          <a href="#" class="btn p-0"
-             data-toggle="tooltip" data-placement="right" title="Home">
-            <i class="fas fa-2x fa-square"></i>
-          </a>
-        </span>
-      </div>
-    </div>
-  </div>
-
-  <div class="container-md">
-    <div class="form-container p-md-4">
-      <h1 class="py-4">
-        Customer
-      </h1>
-
-      {% if object_list %}
-      <table class="table table-hover table-borderless table-striped">
-        <thead>
-        <tr>
-          <th scope="col">Name</th>
-          <th scope="col">User</th>
-          <th scope="col">Phone</th>
-          <th scope="col" class="d-none d-md-table-cell">Date Created</th>
-          <th scope="col" class="text-right">Action</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for post in object_list %}
-        <tr class="row_{{post.id}}">
+{% block list_table %}
+  {% if object_list %}
+    <table class="table table-hover table-borderless table-striped">
+      <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">User</th>
+        <th scope="col">Phone</th>
+        <th scope="col" class="d-none d-md-table-cell">Date Created</th>
+        <th scope="col" class="text-right">Action</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for post in object_list %}
+        <tr class="row_{{ post.id }}">
           <td class="align-middle">{{ post.name }}</td>
           <td class="align-middle">{{ post.primary_contact.username }}</td>
           <td class="align-middle">{{ post.phone }}</td>
@@ -59,21 +33,14 @@
 
           </td>
         </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <p class="lead">You have no Customer yet.</p>
-      {% endif %}
+      {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="lead">You have no Customers yet.</p>
+  {% endif %}
+{% endblock %}
 
-      <div class="row mt-4">
-        <div class="col-12 col-md text-md-right mt-4 my-md-0">
-          <a href="{% url 'customer:customer_new' %}" class="btn btn-block btn-primary text-white py-2">
-            <span>Create New Customer</span>
-          </a>
-        </div>
-      </div>
+{% block createitem_url %}{% url 'customer:customer_new' %}{% endblock %}
 
-    </div>
-  </div>
-{% endblock rawcontent %}
+{% block createitem_cta %}Create New Customer{% endblock %}

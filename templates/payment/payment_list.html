@@ -1,58 +1,32 @@
-{% extends '_customer.html' %}
+{% extends '_qux_payments_list.html' %}
 {% load static %}
 
-{% block stylesheets %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'css/listview.css' %}">
-{% endblock stylesheets %}
+{% block header_icon %}<i class="fad fa-fw fa-credit-card"></i>{% endblock %}
 
-{% block customstyle %}
-  {{ block.super }}
-{% endblock %}
+{% block header_text %}Payment{% endblock %}
 
-{% block rawcontent %}
-  {{ block.super }}
+{% block list_table %}
+  {% if object_list %}
+    <table class="table table-hover table-borderless table-striped">
+      <thead>
+      <tr>
+        <th scope="col">Customer</th>
+        <th scope="col">Invoice</th>
+        <th scope="col">Payment Date</th>
+        <th scope="col">Mode</th>
+        <th scope="col">Source</th>
+        <th scope="col">Status</th>
+        <th scope="col" class="text-right">Amount</th>
+        <th scope="col" class="text-center">Date</th>
+        <th scope="col" class="text-right">Action</th>
+      </tr>
+      </thead>
+      <tbody>
 
-  <div class="container-md">
-    <div class="form-container py-4 p-md-4">
-      <div class="form_prefix">
-        <span>
-          <a href="#" class="btn p-0"
-             data-toggle="tooltip" data-placement="right" title="Home">
-            <i class="fas fa-2x fa-square"></i>
-          </a>
-        </span>
-      </div>
-    </div>
-  </div>
-
-  <div class="container-md">
-    <div class="form-container p-md-4">
-      <h1 class="py-4">
-        Payment
-      </h1>
-
-      {% if object_list %}
-      <table class="table table-hover table-borderless table-striped">
-        <thead>
-        <tr>
-          <th scope="col">Customer</th>
-          <th scope="col">Invoice </th>
-          <th scope="col">Payment Date</th>
-          <th scope="col">Mode</th>
-          <th scope="col">Source</th>
-          <th scope="col">Status</th>
-          <th scope="col" class="text-right">Amount</th>
-          <th scope="col" class="text-center">Date</th>
-          <th scope="col" class="text-right">Action</th>
-        </tr>
-        </thead>
-        <tbody>
-
-        {% for post in object_list %}
-        <tr class="row_{{post.id}}">
+      {% for post in object_list %}
+        <tr class="row_{{ post.id }}">
           <td class="text-truncate">{{ post.invoice.customer }}</td>
-	  <td class=""><code>{{ post.invoice.invoice_number }}</code></td>
+          <td class=""><code>{{ post.invoice.invoice_number }}</code></td>
           <td class="text-nowrap text-nowrap">{{ post.payment_date }}</td>
           <td class="text-truncate">{{ post.payment_mode }}</td>
           <td class="">{{ post.payment_source }}</td>
@@ -65,21 +39,14 @@
             <a href="{% url 'customer:payment_edit' post.slug %}">Edit</a>
           </td>
         </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <p class="lead">You have no payments yet.</p>
-      {% endif %}
+      {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="lead">You have no payments yet.</p>
+  {% endif %}
+{% endblock list_table %}
 
-      <div class="row mt-4">
-        <div class="col-12 col-md text-md-right mt-4 my-md-0">
-          <a href="{% url 'customer:payment_new' %}" class="btn btn-block btn-primary text-white py-2">
-            <span>Create New Payment</span>
-          </a>
-        </div>
-      </div>
+{% block createitem_url %}{% url 'customer:payment_new' %}{% endblock %}
 
-    </div>
-  </div>
-{% endblock rawcontent %}
+{% block createitem_cta %}Create New Payment{% endblock createitem_cta %}

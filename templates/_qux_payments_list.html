@@ -1,0 +1,25 @@
+{% extends '_qux_payments.html' %}
+{% load static %}
+
+{% block rawcontent %}
+  {{ block.super }}
+
+  <div class="container-xl">
+    <h1 class="my-4">
+      {% block header_icon %}{% endblock %}
+      {% block header_text %}{% endblock %}
+    </h1>
+
+    {% block list_table %}
+    {% endblock list_table %}
+
+    <div class="row mt-4">
+      <div class="col-12 col-md text-md-right mt-4 my-md-0">
+        <a href="{% block createitem_url %}{% endblock createitem_url%}"
+           class="btn btn-block btn-primary text-white py-2">
+          {% block createitem_cta %}{% endblock createitem_cta %}
+        </a>
+      </div>
+    </div>
+  </div>
+{% endblock rawcontent %}
