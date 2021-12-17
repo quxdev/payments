@@ -41,7 +41,8 @@ def stripe_config(request):
 @csrf_exempt
 def create_checkout_request(request):
     if request.method == 'GET':
-        domain_url = settings.STRIPE_DOMAIN_URL
+        domain_url = request.build_absolute_uri('/')[:-1]
+
         stripe.api_key = settings.STRIPE_SECRET_KEY
         try:
             # Create new Checkout Session for the order
@@ -66,8 +67,8 @@ def create_checkout_request(request):
 
             checkout_session = stripe.checkout.Session.create(
                 client_reference_id=receipt,
-                success_url=domain_url + 'billing/stripe/success?session_id={CHECKOUT_SESSION_ID}',
-                cancel_url=domain_url + 'billing/stripe/cancelled/',
+                success_url=domain_url + '/billing/stripe/success?session_id={CHECKOUT_SESSION_ID}',
+                cancel_url=domain_url + '/billing/stripe/cancelled/',
                 payment_method_types=['card'],
                 mode='payment',
                 line_items=[
