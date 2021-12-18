@@ -3,8 +3,8 @@
 
 {% block stylesheets %}
   {{ block.super }}
-  <link rel="stylesheet" href="{% static 'css/select2/select2.min.css' %}">
-  <link rel="stylesheet" href="{% static 'css/qux-select2.css' %}">
+  <link rel="stylesheet" href="{% static 'css/select2.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/qux/select2.css' %}">
 {% endblock stylesheets %}
 
 {% block customstyle %}
@@ -119,7 +119,7 @@
 {% block javascript %}
 {{ block.super }}
 <script src="{% static 'js/jquery.formset.js' %}"></script>
-<script src="{% static 'js/select2/select2.min.js' %}"></script>
+<script src="{% static 'js/select2.min.js' %}"></script>
 {% endblock %}
 
 {% block customjs %}

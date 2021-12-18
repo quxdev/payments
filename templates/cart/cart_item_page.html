@@ -3,8 +3,8 @@
 
 {% block stylesheets %}
   {{ block.super }}
-  <link rel="stylesheet" href="{% static 'css/select2/select2.min.css' %}">
-  <link rel="stylesheet" href="{% static 'css/qux-select2.css' %}">
+  <link rel="stylesheet" href="{% static 'css/select2.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/qux/select2.css' %}">
 {% endblock stylesheets %}
 
 {% block customstyle %}
@@ -12,7 +12,6 @@
 <style>
   h3 {
     font-size: 1.25rem;
-    font-weight: 500;
     margin-top: 1rem;
     font-weight: bold;
   }
@@ -157,9 +156,9 @@
             <tr class='for_plan'>
               <td>Product (<span class="product_name"></span>)</td>
               <td class='text-center'>
-                <input type="number" class="item_added_qty quantity"
-                id="qty" name="qty" style="width: 5em"
-                min="1" value="1" onchange="change_plan_qty(value)">
+                <input type="number" id="qty" name="qty"
+                       class="item_added_qty quantity" style="width: 5em"
+                       min="1" value="1" onchange="change_plan_qty(value)">
               </td>
               <td class='item_amount currency'>-</td>
             </tr>
@@ -223,9 +222,9 @@
 
 {% block javascript %}
 {{ block.super }}
-<script src="{% static 'js/jquery.formset.js' %}"></script>
-<script src="{% static 'js/select2/select2.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/cart.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/jquery.formset.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/qux/payments/cart.js' %}"></script>
 {% endblock %}
 
 {% block customjs %}

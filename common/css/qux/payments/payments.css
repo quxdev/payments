@@ -1,0 +1,18 @@
+ul.qux-payments {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+li.qux-payments {
+  display: inline-block;
+}
+li.qux-payments:not(:first-child) {
+  padding-left: 1rem;
+}
+@media screen and (max-width: 575px) {
+  li.qux-payments {
+    display: list-item !important;
+    padding-left: 0 !important;
+  }
+  li.qux-payments
+}

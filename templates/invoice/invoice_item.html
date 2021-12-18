@@ -1,25 +1,25 @@
-{% extends 'invoice/_invoice.html' %}
+{% extends '_qux_payments_item.html' %}
 
 {% block customstyle %}
   {{ block.super }}
-<style>
-.table thead {
-  background: rgba(0, 0, 0, 0.20);
-}
-.table tbody {
-  background: white;
-}
-.table tbody tr {
-  cursor: pointer;
-}
-.table th, .table td {
-  padding: 0.5rem;
-  border-bottom: 1px solid rgb(229, 231, 233);
-}
-#invoice {
-  background: white;
-}
-</style>
+  <style>
+    .table thead {
+      background: rgba(0, 0, 0, 0.20);
+    }
+    .table tbody {
+      background: white;
+    }
+    .table tbody tr {
+      cursor: pointer;
+    }
+    .table th, .table td {
+      padding: 0.5rem;
+      border-bottom: 1px solid rgb(229, 231, 233);
+    }
+    #invoice {
+      background: white;
+    }
+  </style>
 {% endblock customstyle %}
 
 
@@ -51,97 +51,100 @@
           {% endif %}
         {% endblock %}
       </h1>
-{% with custuser=object.customer.primary_contact custprofile=object.customer.primary_contact.profile %}
-    {# Invoice Header #}
-    <div class="row">
-      {# Invoice Header #}
-      <div class="col-12 col-sm-6 order-sm-last my-2">
+      {% with custuser=object.customer.primary_contact custprofile=object.customer.primary_contact.profile %}
+        {# Invoice Header #}
         <div class="row">
-          <div class="col text-sm-right">
-            <div>Invoice Date: {{ object.dtm_created }}</div>
-            <div>Invoice No: {{ object.invoice_number }}</div>
-          </div>
-        </div>
-      </div>
-
-      {# Seller Information #}
-      <div class="col-12 col-sm-6">
-        <div class="row">
-          <div class="col-12 my-2">
-            <div>Seller: <b>{{ invoice_seller.name }}</b></div>
-            <div>{{ invoice_seller.address }}</div>
-            {% if invoice_seller.gstin %}
-            <div>GSTIN: <span class="text-muted">{{invoice_seller.gstin}}</span></div>
-            {% endif %}
-          </div>
-
-          {% if custuser and profile %}
-          <div class="col-12 my-2">
-            {% if user.username == 'vishal' %}
-            <!-- {{ user }} -->
-            <!-- {{ object.to_dict }} -->
-            <!-- {{ object.customer.to_dict }} -->
-            <!-- {{ custuser }} -->
-            <!-- {{ custprofile }} -->
-            {% endif %}
-
-            <div>Buyer: {{ custuser.first_name }} {{ custuser.last_name }}</div>
-            <div>
-              {% if custprofile.city %}{{ custprofile.city }} &bullet; {% endif %}
-              {% if custprofile.state %}{{ custprofile.state|upper }} {% endif %}
-              {% if custprofile.pincode %}{{ custprofile.pincode }}{% endif %}
-            </div>
-            <div>
-              GSTIN: <span class="text-muted">{{ object.customer.gstin }}</span>
+          {# Invoice Header #}
+          <div class="col-12 col-sm-6 order-sm-last my-2">
+            <div class="row">
+              <div class="col text-sm-right">
+                <div>Invoice Date: {{ object.dtm_created }}</div>
+                <div>Invoice No: {{ object.invoice_number }}</div>
+              </div>
             </div>
           </div>
 
-          {% elif user.username == 'vishal' %}
-          <div>{{ object.customer.to_dict }}</div>
+          {# Seller Information #}
+          <div class="col-12 col-sm-6">
+            <div class="row">
+              <div class="col-12 my-2">
+                <div>Seller: <b>{{ invoice_seller.name }}</b></div>
+                <div>{{ invoice_seller.address }}</div>
+                {% if invoice_seller.gstin %}
+                  <div>GSTIN: <span class="text-muted">{{ invoice_seller.gstin }}</span></div>
+                {% endif %}
+              </div>
 
-          <div class="col-12 my-2">
-            <div>Buyer: Vishal Apte</div>
-            <div>Pune &bullet; MH 411007</div>
-            <div>GSTIN: <span class="text-muted">27ABCDE3456F7G8</span></div>
+              {% if custuser and profile %}
+                <div class="col-12 my-2">
+                  {% if user.username == 'vishal' %}
+                    <!-- {{ user }} -->
+                    <!-- {{ object.to_dict }} -->
+                    <!-- {{ object.customer.to_dict }} -->
+                    <!-- {{ custuser }} -->
+                    <!-- {{ custprofile }} -->
+                  {% endif %}
+
+                  <div>Buyer: {{ custuser.first_name }} {{ custuser.last_name }}</div>
+                  <div>
+                    {% if custprofile.city %}{{ custprofile.city }} &bullet; {% endif %}
+                    {% if custprofile.state %}{{ custprofile.state|upper }} {% endif %}
+                    {% if custprofile.pincode %}{{ custprofile.pincode }}{% endif %}
+                  </div>
+                  <div>
+                    GSTIN: <span class="text-muted">{{ object.customer.gstin }}</span>
+                  </div>
+                </div>
+
+              {% elif user.username == 'vishal' %}
+                <div>{{ object.customer.to_dict }}</div>
+
+                <div class="col-12 my-2">
+                  <div>Buyer: Vishal Apte</div>
+                  <div>Pune &bullet; MH 411007</div>
+                  <div>GSTIN: <span class="text-muted">27ABCDE3456F7G8</span></div>
+                </div>
+
+              {% endif %}
+            </div>
           </div>
-
-          {% endif %}
         </div>
-      </div>
-    </div>
 
-    {# Invoice Details #}
-    <div id="invoice-items" class="pt-4 mx-sm-n2">
-      <table class="table table-hover table-borderless table-sm">
-        <thead>
-        <tr>
-          <th scope="col" class="">Product</th>
-          <th scope="col" class="text-right" style="min-width: 40px;">Amount</th>
-          {% if KYC_GST_PAN_REQUIRED %}<th scope="col" class="text-right" style="min-width: 40px;">GST</th>{% endif %}
-          <th scope="col" class="text-right" style="min-width: 40px;">Total</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for item in object.items.all %}
-          <tr>
-            <td>{{ item.product.category|upper }} / {{ item.product.description }}</td>
-            <td class="text-nowrap text-right">{{ item.amount | floatformat:2 }}</td>
-            {% if KYC_GST_PAN_REQUIRED %}<td class="text-nowrap text-right">{{ item.gst | floatformat:2 }}</td>{% endif %}
-            <td class="text-nowrap text-right">{{ item.amount | add:item.gst | floatformat:2 }}</td>
-          </tr>
-        {% endfor %}
-        </tbody>
-        <tfoot>
-        <tr>
-          <th>Total</th>
-          <th class="text-nowrap text-right">{{ object.amount | floatformat:2 }}</th>
-          {% if KYC_GST_PAN_REQUIRED %}<th class="text-nowrap text-right">{{ object.gst | floatformat:2 }}</th>{% endif %}
-          <th class="text-nowrap text-right">{{ object.amount | add:object.gst | floatformat:2 }}</th>
-        </tr>
-        </tfoot>
-      </table>
-    </div>
-  </div>
-</div>
-{% endwith %}
+        {# Invoice Details #}
+        <div id="invoice-items" class="pt-4 mx-sm-n2">
+          <table class="table table-hover table-borderless table-sm">
+            <thead>
+            <tr>
+              <th scope="col" class="">Product</th>
+              <th scope="col" class="text-right" style="min-width: 40px;">Amount</th>
+              {% if KYC_GST_PAN_REQUIRED %}
+                <th scope="col" class="text-right" style="min-width: 40px;">GST</th>{% endif %}
+              <th scope="col" class="text-right" style="min-width: 40px;">Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in object.items.all %}
+              <tr>
+                <td>{{ item.product.category|upper }} / {{ item.product.description }}</td>
+                <td class="text-nowrap text-right">{{ item.amount | floatformat:2 }}</td>
+                {% if KYC_GST_PAN_REQUIRED %}
+                  <td class="text-nowrap text-right">{{ item.gst | floatformat:2 }}</td>{% endif %}
+                <td class="text-nowrap text-right">{{ item.amount | add:item.gst | floatformat:2 }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+            <tr>
+              <th>Total</th>
+              <th class="text-nowrap text-right">{{ object.amount | floatformat:2 }}</th>
+              {% if KYC_GST_PAN_REQUIRED %}
+                <th class="text-nowrap text-right">{{ object.gst | floatformat:2 }}</th>{% endif %}
+              <th class="text-nowrap text-right">{{ object.amount | add:object.gst | floatformat:2 }}</th>
+            </tr>
+            </tfoot>
+          </table>
+        </div>
+        </div>
+        </div>
+      {% endwith %}
 {% endblock rawcontent %}

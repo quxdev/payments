@@ -208,9 +208,12 @@ def send_email_on_new_customer(customer_obj):
 
     message = customer_obj.to_text()
 
+    sales_team = getattr(settings, "SALES_TEAM", None)
+    if sales_team is None:
+        return
+
     if getattr(settings, 'PAYMENT_EMAIL_ON_NEW_CUSTOMER', True):
-        email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL,
-                             settings.TEAM_SALES)
+        email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, sales_team)
         email.content_subtype = 'html'
         res = email.send()
         print('send_email_on_new_customer res =', res)

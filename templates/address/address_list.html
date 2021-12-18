@@ -1,8 +1,6 @@
 {% extends '_qux_payments_list.html' %}
 {% load static %}
 
-{% block header_icon %}<i class="fad fa-fw fa-address-card"></i>{% endblock %}
-
 {% block header_text %}Addresses{% endblock %}
 
 {% block list_table %}
@@ -42,10 +40,10 @@
       </tbody>
     </table>
   {% else %}
-    <p class="lead">You have no Address yet.</p>
+    <p>You have no Address yet.</p>
   {% endif %}
 {% endblock %}
 
 {% block createitem_url %}{% url 'customer:address_new' %}{% endblock %}
 
-{% block createitem_cta %}Create New Address{% endblock createitem_cta %}
+{% block createitem_cta %}Address{% endblock createitem_cta %}

@@ -1,8 +1,6 @@
 {% extends '_qux_payments_list.html' %}
 {% load static %}
 
-{% block header_icon %}<i class="fad fa-fw fa-credit-card"></i>{% endblock %}
-
 {% block header_text %}Payment{% endblock %}
 
 {% block list_table %}
@@ -43,10 +41,10 @@
       </tbody>
     </table>
   {% else %}
-    <p class="lead">You have no payments yet.</p>
+    <p>You have no payments yet.</p>
   {% endif %}
 {% endblock list_table %}
 
 {% block createitem_url %}{% url 'customer:payment_new' %}{% endblock %}
 
-{% block createitem_cta %}Create New Payment{% endblock createitem_cta %}
+{% block createitem_cta %}Payment{% endblock createitem_cta %}

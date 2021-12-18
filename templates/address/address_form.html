@@ -1,77 +1,25 @@
-{% extends 'forms/_form.html' %}
+{% extends '_qux_payments_form.html' %}
 {% load static %}
-
-{% block stylesheets %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'css/select2/select2.min.css' %}">
-  <link rel="stylesheet" href="{% static 'css/qux-select2.css' %}">
-{% endblock stylesheets %}
-
-{% block customstyle %}
-  {{ block.super }}
-  <style>
-  #form-container {
-    max-width: none;
-  }
-  </style>
-{% endblock customstyle %}
-
-{% block form_title %}{{ form_title }}{% endblock %}
-
-{% block form_body %}
-{% if messages %}
-    <div class="row">
-      <div class="col">
-        {% for m in messages %}
-          <p class="lead">{{ m }}</p>
-        {% endfor %}
-      </div>
-    </div>
-{% endif %}
-<form method="post">
-  {% csrf_token %}
-
-    {% include 'forms/_hfields.html' %}
-
-      <div class="row mt-4">
-        <div class="col">
-          <button type="submit" class="btn btn-primary btn-block">
-              {% if submit_btn_text %}
-                 {{ submit_btn_text }}
-              {% else %}
-                 Submit
-              {% endif %}
-          </button>
-        </div>
-      </div>
-    </form>
-  </div>
-{% endblock form_body %}
-
-{% block javascript %}
-  {{ block.super }}
-  <script src="{% static 'js/select2/select2.min.js' %}"></script>
-{% endblock %}
 
 {% block customjs %}
   <script type="text/javascript">
     $(document).ready(function () {
-        // $('#id_user').select2(); // without ajax
+      // $('#id_user').select2(); // without ajax
 
-        $('#id_user').select2({
-            ajax: {
-                url: '{% url 'customer:user-autocomplete' %}',
-                dataType: 'json',
-                processResults: function (data) {
-                    return {
-                        results: $.map(data, function (item) {
-                            return {id: item.id, text: item.email};
-                        })
-                    };
-                }
-            },
-            minimumInputLength: 1
-        });
+      $('#id_user').select2({
+        ajax: {
+          url: '{% url 'customer:user-autocomplete' %}',
+          dataType: 'json',
+          processResults: function (data) {
+            return {
+              results: $.map(data, function (item) {
+                return {id: item.id, text: item.email};
+              })
+            };
+          }
+        },
+        minimumInputLength: 1
+      });
     });
   </script>
 {% endblock %}

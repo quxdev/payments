@@ -1,1 +1,25 @@
 {% extends '_blank.html' %}
+{% load static %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/qux/payments/payments.css' %}">
+{% endblock %}
+
+{% block rawcontent %}
+  {{ block.super }}
+
+  {% include '_qux_payments_subnav.html' %}
+
+  <div class="container-xl px-4 px-xl-0">
+    <h1 class="my-4" style="font-size: 1.50rem;">
+      {% block header_icon %}{% endblock %}
+      {% block header_text %}{% endblock %}
+    </h1>
+  </div>
+
+  <div class="container-xl px-4 px-xl-0">
+  {% block qux_payments_content %}
+  {% endblock qux_payments_content %}
+  </div>
+{% endblock %}

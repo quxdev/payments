@@ -1,8 +1,6 @@
 {% extends '_qux_payments_list.html' %}
 {% load static %}
 
-{% block header_icon %}<i class="fad fa-fw fa-user-circle"></i>{% endblock %}
-
 {% block header_text %}Customers{% endblock %}
 
 {% block list_table %}
@@ -37,10 +35,10 @@
       </tbody>
     </table>
   {% else %}
-    <p class="lead">You have no Customers yet.</p>
+    <p>You have no Customers yet.</p>
   {% endif %}
 {% endblock %}
 
 {% block createitem_url %}{% url 'customer:customer_new' %}{% endblock %}
 
-{% block createitem_cta %}Create New Customer{% endblock %}
+{% block createitem_cta %}Customer{% endblock %}

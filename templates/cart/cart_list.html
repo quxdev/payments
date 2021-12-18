@@ -1,7 +1,5 @@
-{% extends '_blank.html' %}
+{% extends '_qux_payments_list.html' %}
 {% load static %}
-
-{% block header_icon %}<i class="fad fa-fw fa-shopping-cart"></i>{% endblock %}
 
 {% block header_text %}Shopping Carts{% endblock %}
 
@@ -42,4 +40,4 @@
 
 {% block createitem_url %}{% url 'customer:cart_new' %}{% endblock %}
 
-{% block createitem_cta %}Create New Cart{% endblock createitem_cta %}
+{% block createitem_cta %}Cart{% endblock createitem_cta %}

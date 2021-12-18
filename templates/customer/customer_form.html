@@ -1,63 +1,13 @@
-{% extends 'forms/_form.html' %}
+{% extends '_qux_payments_form.html' %}
 {% load static %}
-
-{% block stylesheets %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'css/select2/select2.min.css' %}">
-  <link rel="stylesheet" href="{% static 'css/qux-select2.css' %}">
-{% endblock stylesheets %}
-
-{% block customstyle %}
-  {{ block.super }}
-  <style>
-  #form-container {
-    max-width: none;
-  }
-  </style>
-{% endblock customstyle %}
-
-{% block form_title %}{{ form_title }}{% endblock %}
-
-{% block form_body %}
-{% if messages %}
-    <div class="row">
-      <div class="col">
-        {% for m in messages %}
-          <p class="lead">{{ m }}</p>
-        {% endfor %}
-      </div>
-    </div>
-{% endif %}
-<form method="post">
-{% csrf_token %}
-  {% include 'forms/_hfields.html' %}
-
-  <div class="row mt-4">
-    <div class="col">
-      <button type="submit" class="btn btn-primary btn-block py-2">
-        {% if submit_btn_text %}
-           {{ submit_btn_text }}
-        {% else %}
-           Submit
-        {% endif %}
-      </button>
-    </div>
-  </div>
-
-</form>
-{% endblock form_body %}
-
-{% block javascript %}
-  {{ block.super }}
-  <script src="{% static 'js/select2/select2.min.js' %}"></script>
-{% endblock %}
 
 {% block customjs %}
   <script type="text/javascript">
     $(document).ready(function () {
       // $('#id_primary_contact').select2(); // without ajax
 
-      $('#id_primary_contact').select2({
+      let id_primary_contact = $('#id_primary_contact')
+      id_primary_contact.select2({
         ajax: {
           url: '{% url 'customer:user-autocomplete' %}',
           dataType: 'json',
@@ -72,19 +22,18 @@
         minimumInputLength: 1,
       });
 
-      var user_id = $('#id_primary_contact').val();
-      if(user_id != '' && user_id != undefined){
+      let user_id = id_primary_contact.val();
+      if (user_id !== '' && user_id !== undefined) {
         change_address_list(user_id);
       }
-
     });
 
     $('#id_primary_contact').change(function () {
-      var user_id = this.value;
+      let user_id = this.value;
       change_address_list(user_id);
     });
 
-    function change_address_list(user_id){
+    function change_address_list(user_id) {
       let url = "{% url 'customer:user-details' 9876543210 %}";
       url = url.replace('9876543210', user_id);
 
@@ -92,30 +41,32 @@
         url: url,
         type: 'get',
         success: function (data) {
-          var $el = $("#id_billing_address");
-          $el.empty(); // remove old options
+          /*
+           * @param data.addresses
+           * @param data.phone
+           * @param data.email
+           * */
+          let $idBillAddress = $("#id_billing_address");
+          // remove old options
+          $idBillAddress.empty();
 
-          var values = data.addresses;
+          let $idShipAddress = $("#id_shipping_address");
+          // remove old options
+          $idShipAddress.empty();
+
+          let values = data.addresses;
           values.forEach((item) => {
-            $el.append($("<option></option>").attr("value", item.id).text(item.address));
+            $idBillAddress.append($("<option></option>").attr("value", item.id).text(item.address));
+            $idShipAddress.append($("<option></option>").attr("value", item.id).text(item.address));
           });
 
-          var $el = $("#id_shipping_address");
-          $el.empty(); // remove old options
-
-          var values = data.addresses;
-          values.forEach((item) => {
-            $el.append($("<option></option>").attr("value", item.id).text(item.address));
-          });
-
-          if(data.phone){
+          if (data.phone) {
             $('#id_phone').val(data.phone);
           }
 
-          if(data.email){
+          if (data.email) {
             $('#id_email').val(data.email);
           }
-
         },
       });
     }

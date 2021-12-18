@@ -1,0 +1,49 @@
+{% extends '_qux_payments.html' %}
+{% load static %}
+
+{% block stylesheets %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/select2.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/qux/select2.css' %}">
+{% endblock stylesheets %}
+
+{% block header_text %}{{ form_title }}{% endblock %}
+
+{% block qux_payments_content %}
+
+{% block form_body %}
+{% if messages %}
+<div class="row">
+  <div class="col">
+    {% for m in messages %}
+      <p class="lead">{{ m }}</p>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+  {% include 'forms/_hfields.html' %}
+</form>
+{% endblock form_body %}
+
+{# Submit button #}
+<div class="row mt-4">
+  <div class="offset-sm-4 col-sm-8 offset-md-3 col-md-9 offset-xl-2 col-xl-10">
+    <button type="submit" class="btn btn-primary btn-block">
+      {% if submit_btn_text %}
+        {{ submit_btn_text }}
+      {% else %}
+        Submit
+      {% endif %}
+    </button>
+  </div>
+</div>
+
+{% endblock qux_payments_content %}
+
+{% block javascript %}
+  {{ block.super }}
+  <script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
+{% endblock %}
