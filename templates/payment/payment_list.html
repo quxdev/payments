@@ -5,7 +5,7 @@
 
 {% block list_table %}
   {% if object_list %}
-    <table class="table table-hover table-borderless table-striped">
+    <table class="table table-hover table-borderless qux-table table-listview">
       <thead>
       <tr>
         <th scope="col">Customer</th>
@@ -16,11 +16,10 @@
         <th scope="col">Status</th>
         <th scope="col" class="text-right">Amount</th>
         <th scope="col" class="text-center">Date</th>
-        <th scope="col" class="text-right">Action</th>
+        <th scope="col"></th>
       </tr>
       </thead>
       <tbody>
-
       {% for post in object_list %}
         <tr class="row_{{ post.id }}">
           <td class="text-truncate">{{ post.invoice.customer }}</td>
@@ -41,7 +40,7 @@
       </tbody>
     </table>
   {% else %}
-    <p>You have no payments yet.</p>
+    <p>No payments yet.</p>
   {% endif %}
 {% endblock list_table %}
 

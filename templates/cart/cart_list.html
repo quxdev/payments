@@ -4,18 +4,18 @@
 {% block header_text %}Shopping Carts{% endblock %}
 
 {% block list_table %}
-  <table class="table table-hover table-borderless table-striped">
-    <thead>
-    <tr>
-      <th scope="col" class="d-none d-sm-table-cell">Cart No</th>
-      <th scope="col" class="d-none d-sm-table-cell">Customer</th>
-      <th scope="col" class="d-none d-sm-table-cell">Is Open</th>
-      <th scope="col" class="">Date</th>
-      <th scope="col" class="text-right">Amount</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% if object_list %}
+  {% if object_list %}
+    <table class="table table-hover table-borderless qux-table table-listview">
+      <thead>
+      <tr>
+        <th scope="col" class="d-none d-sm-table-cell">Cart No</th>
+        <th scope="col" class="d-none d-sm-table-cell">Customer</th>
+        <th scope="col" class="d-none d-sm-table-cell">Is Open</th>
+        <th scope="col" class="">Date</th>
+        <th scope="col" class="text-right">Amount</th>
+      </tr>
+      </thead>
+      <tbody>
       {% for post in object_list %}
         <tr class="row_{{ post.id }}" onclick="location.href='{% url 'customer:cart_edit' post.id %}'">
           <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">{{ post.slug }}</code></td>
@@ -25,17 +25,11 @@
           <td class="text-right">{{ post.total_amount | floatformat:2 }}</td>
         </tr>
       {% endfor %}
-    {% else %}
-      <tr class="row_{{ post.id }}" onclick="location.href='#'">
-        <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">abcdefghijkl</code></td>
-        <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">Qux Qux</code></td>
-        <td class="text-nowrap d-none d-sm-table-cell"><code class="text-dark">True</code></td>
-        <td class="text-nowrap">2021-12-31 00:00:00Z0000</td>
-        <td class="text-right">42.00</td>
-      </tr>
-    {% endif %}
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  {% else %}
+    <p>No shopping carts yet.</p>
+  {% endif %}
 {% endblock list_table %}
 
 {% block createitem_url %}{% url 'customer:cart_new' %}{% endblock %}
