@@ -45,6 +45,7 @@ class OnPaymentSuccess:
         return True
 
 
+# Primary Model
 class Address(CoreModelPlus):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
     address = models.TextField(**default_null_blank)
@@ -69,6 +70,7 @@ class Address(CoreModelPlus):
         return ', '.join(arr)
 
 
+# Primary Model
 class Customer(CoreModel):
     regexp = RegexValidator(
         regex=r'^\+?[1-9]\d{4,14}$',
@@ -237,6 +239,7 @@ class CartInvoice(CoreModel):
         abstract = True
 
 
+# Primary Model
 class Cart(CartInvoice):
     is_open = models.BooleanField(default=True)
 
@@ -456,6 +459,7 @@ class Cart(CartInvoice):
         return cart
 
 
+# Primary Model
 class Invoice(CartInvoice):
     cart = models.ForeignKey(Cart, on_delete=models.DO_NOTHING, **default_null_blank)
 
@@ -600,6 +604,7 @@ class Invoice(CartInvoice):
         return message
 
 
+# Primary Model
 class Payment(CoreModel):
     PAYMENT_MODE = (
         ('Cash', 'Cash'),
