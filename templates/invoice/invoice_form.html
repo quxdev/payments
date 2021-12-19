@@ -1,55 +1,64 @@
 {% extends '_qux_payments_form.html' %}
 {% load static qux quxform %}
 
-{% block form_body %}
-  {% if messages %}
-    <div class="row">
-      <div class="col">
-        {% for m in messages %}
-          <p class="lead">{{ m }}</p>
-        {% endfor %}
-      </div>
-    </div>
-  {% endif %}
+{% block form_custom %}
+  <div class="py-3 font-weight-bold" style="font-size: 1.25rem;">Products</div>
 
-  <form method="post">
-    {% csrf_token %}
+  <table class="table qux-table table-formview">
+    {{ items.management_form }}
 
-    {% include 'forms/_hfields.html' %}
-
-    <legend>Products</legend>
-    <table class="table">
-      {{ items.management_form }}
-
-      {% for form in items.forms %}
-
-        {% if forloop.first %}
-          <thead>
-          <tr>
-            {% for field in form.visible_fields %}
-              <th>{{ field.label|capfirst }}</th>
-            {% endfor %}
-          </tr>
-          </thead>
+    <thead>
+    <tr>
+      {% for field in items.forms.0.visible_fields %}
+        {% if not forloop.last %}
+        <th scope="col">{{ field.label|capfirst }}</th>
         {% endif %}
-        <tr class="{% cycle 'row1' 'row2' %} formset_row-{{ items.prefix }}">
-          {% for field in form.visible_fields %}
-            <td>
-              {# Include the hidden fields in the form #}
-              {% if forloop.first %}
-                {% for hidden in form.hidden_fields %}
-                  {{ hidden }}
-                {% endfor %}
-              {% endif %}
-              {{ field.errors.as_ul }}
-              {{ field }}
-            </td>
-          {% endfor %}
-        </tr>
       {% endfor %}
-    </table>
-  </form>
-{% endblock form_body %}
+      <th scope="col" style="min-width: 40px;"></th>
+    </tr>
+    </thead>
+
+    <tbody id="products-table">
+    {% for form in items.forms %}
+      <tr class="{% cycle 'row1' 'row2' %} formset_row_{{ items.prefix }}">
+        {% for field in form.visible_fields %}
+          {% if not forloop.last %}
+          <td>
+            {# Include the hidden fields in the form #}
+            {% if forloop.first %}
+              {% for hidden in form.hidden_fields %}
+                {{ hidden }}
+              {% endfor %}
+            {% endif %}
+            {{ field.errors.as_ul }}
+            {{ field }}
+          </td>
+          {% endif %}
+        {% endfor %}
+        <td></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock form_custom %}
+
+{% block form_submit %}
+  <div class="row my-4">
+    <div class="col-12 col-sm-4 col-md-3 col-xl-2 mb-3 mb-sm-0">
+      <div class="add-new"></div>
+    </div>
+
+    <div class="col-12 col-sm-8 col-md-9 col-xl-10">
+      <button type="submit" class="btn btn-primary btn-block">
+        {% if submit_btn_text %}
+          {{ submit_btn_text }}
+        {% else %}
+          Submit
+        {% endif %}
+      </button>
+    </div>
+  </div>
+{% endblock form_submit %}
 
 {% block customjs %}
   <script type="text/javascript">
@@ -72,13 +81,24 @@
       });
     });
 
-    $('document').ready(function () {
-      $('.formset_row-{{ items.prefix }}').formset({
-        addText: 'Add',
+    function moveAddedRow(element) {
+      $(element).appendTo("#products-table");
+    }
+
+    function configureFormset() {
+      $('.formset_row_{{ items.prefix }}').formset({
+        addText: '<i class="fas fa-plus"></i> Add',
+        addContainerClass: 'add-new',
+        addCssClass: 'btn btn-secondary btn-block text-center text-sm-left',
+        added: moveAddedRow,
         deleteText: 'Remove',
+        deleteCssClass: 'btn btn-danger',
         prefix: '{{ items.prefix }}'
       });
+    }
 
+    $(document).ready(function () {
+      configureFormset();
     });
 
     // change product and set amount and gst
@@ -100,7 +120,6 @@
           gst_tg.val(data.gst);
         }
       });
-
     });
   </script>
 {% endblock %}
