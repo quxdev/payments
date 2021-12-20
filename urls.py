@@ -15,25 +15,25 @@ urlpatterns = [
     path('payment/webhook/<str:reference>/', webhook, name='webhook'),
 
     path('payment/', PaymentListView.as_view(), name='payment_home'),
-    path('payment/new/', PaymentCreateView.as_view(), name='payment_new'),
+    path('payment/add/', PaymentCreateView.as_view(), name='payment_new'),
     path('payment/<str:slug>/edit/', PaymentUpdateView.as_view(), name='payment_edit'),
     path('payment/<str:slug>/', PaymentDetailView.as_view(), name='payment_detail'),
 
     path('invoice/', InvoiceListView.as_view(), name='invoice_home'),
-    path('invoice/new/', InvoiceCreateView.as_view(), name='invoice_new'),
+    path('invoice/add/', InvoiceCreateView.as_view(), name='invoice_new'),
     path('invoice/<str:slug>/edit/', InvoiceUpdateView.as_view(), name='invoice_edit'),
     path('invoice/<str:slug>/', InvoiceDetailView.as_view(), name='invoice_detail'),
 
     path('customer/', CustomerListView.as_view(), name='customer_home'),
-    path('customer/new/', CustomerCreateView.as_view(), name='customer_new'),
+    path('customer/add/', CustomerCreateView.as_view(), name='customer_new'),
     path('customer/<str:slug>/edit/', CustomerUpdateView.as_view(), name='customer_edit'),
 
     path('address/', AddressListView.as_view(), name='address_home'),
-    path('address/new/', AddressCreateView.as_view(), name='address_new'),
+    path('address/add/', AddressCreateView.as_view(), name='address_new'),
     path('address/<int:pk>/edit/', AddressUpdateView.as_view(), name='address_edit'),
 
     path('cart/list/', CartListView.as_view(), name='cart_home'),
-    path('cart/new/', CartCreateView.as_view(), name='cart_new'),
+    path('cart/add/', CartCreateView.as_view(), name='cart_new'),
     re_path('cart/(?:(?P<pk>[0-9]+)/)?', CartItemPage.as_view(), name='cart_edit'),
 
     # for customer
