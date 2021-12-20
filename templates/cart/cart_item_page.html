@@ -15,9 +15,6 @@
     margin-top: 1rem;
     font-weight: bold;
   }
-  .qux-content {
-      background-color: rgb(239, 241, 245);
-  }
   .plan_selected {
     background:#00ffb6;
     border:1px solid #00ffb6;
@@ -60,6 +57,9 @@
   }
   .table-extra td, .table-extra th {
       padding: 0.125rem;
+  }
+  table.checkout_table th, table.checkout_table td {
+    vertical-align: middle;
   }
   .choose_plan div{
     cursor: pointer;
@@ -142,12 +142,12 @@
 
         <h3 class="step_2_title">Step 2: Checkout and Make Payment</h3>
 
-        <div class="my-3">
-          <table class="table table-sm checkout_table" style="table-layout: fixed;">
+        <div>
+          <table class="table table-sm checkout_table my-3" style="table-layout: fixed; vertical-align: middle;">
             <thead class="thead-light">
             <tr>
               <th scope="col">ITEM</th>
-              <th scope="col" class="text-center">QTY</th>
+              <th scope="col" class="text-right">QTY</th>
               <th scope="col" class="text-right">AMOUNT</th>
             </tr>
             </thead>
@@ -155,18 +155,14 @@
             <tbody>
             <tr class='for_plan'>
               <td>Product (<span class="product_name"></span>)</td>
-              <td class='text-center'>
+              <td class='text-right'>
+                <label for="qty" class="d-none">Quantity</label>
                 <input type="number" id="qty" name="qty"
-                       class="item_added_qty quantity" style="width: 5em"
+                       class="form-control ml-auto item_added_qty quantity"
+                       style="max-width: 6em;"
                        min="1" value="1" onchange="change_plan_qty(value)">
               </td>
               <td class='item_amount currency'>-</td>
-            </tr>
-            <tr class='for_plan'>
-              <td><b>Total</b></td>
-              <td class='text-center'>
-              </td>
-              <td class='currency total currency_sum'>-</td>
             </tr>
 
             </tbody>
@@ -186,32 +182,43 @@
             </div>
           </div> -->
 
-          <div class="row my-1">
-            <div class="col-6 offset-md-7 col-md-3"><b>Balance Due</b></div>
-            <div class="col-6 col-md-2 currency">
-              <span id="balance_due" class="balance_due currency_sum" style="padding-right: 0.3em;">-</span>
+          <div class="row my-3">
+            <div class="col-8 text-left">
+              <span class="px-1">Total</span>
+            </div>
+            <div class="col-4 text-right font-weight-bolder">
+              <span class='currency total currency_sum px-1'>-</span>
+            </div>
+          </div>
+
+          <div class="row my-3">
+            <div class="col-8 text-left">
+              <span class="px-1">Balance Due</span>
+            </div>
+            <div class="col-4 text-right currency">
+              <span id="balance_due" class="balance_due currency_sum px-1">-</span>
             </div>
           </div>
         </div>
 
         {% if not cart or cart.is_open %}
-        <div class="row mt-4">
-          <div class="col-12 col-md-6">
-            <button type="submit" class="btn btn-primary btn-block py-2" name="submit" value="submit">
-              {% if submit_btn_text %}
-                {{ submit_btn_text }}
-              {% else %}
-                Submit
-              {% endif %}
-            </button>
-          </div>
+          <div class="row mt-4">
+            <div class="col-12 col-md-6">
+              <button type="submit" class="btn btn-primary btn-block py-2" name="submit" value="submit">
+                {% if submit_btn_text %}
+                  {{ submit_btn_text }}
+                {% else %}
+                  Submit
+                {% endif %}
+              </button>
+            </div>
 
-          <div class="col-12 col-md-6 my-4 my-md-0">
-            <button type="submit" class="btn btn-primary btn-block py-2" name="submit" value="payment">
-              Save + Pay
-            </button>
+            <div class="col-12 col-md-6 my-4 my-md-0">
+              <button type="submit" class="btn btn-primary btn-block py-2" name="submit" value="payment">
+                Save + Pay
+              </button>
+            </div>
           </div>
-        </div>
         {% endif %}
 
       </form>
@@ -222,27 +229,27 @@
 
 {% block javascript %}
 {{ block.super }}
-<script type="text/javascript" src="{% static 'js/jquery.formset.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/qux/payments/jquery.formset.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/qux/payments/cart.js' %}"></script>
 {% endblock %}
 
 {% block customjs %}
-<script type="text/javascript">
+  <script type="text/javascript">
 
-let disabled_plan_products = {{ disabled_plan_products|safe }};
+    let disabled_plan_products = {{ disabled_plan_products|safe }};
 
-let cart_initial = {{ initial|safe }};
-cart_initial = cart_initial ? cart_initial : null;
+    let cart_initial = {{ initial|safe }};
+    cart_initial = cart_initial ? cart_initial : null;
 
-let qty, fn;
-for (let cat in cart_initial) {
-  for (let id in cart_initial[cat]) {
-    qty = cart_initial[cat][id]['qty'];
-    fn = window[cat + '_click'];
-    fn(id, 'add', qty);
-  }
-}
+    let qty, fn;
+    for (let cat in cart_initial) {
+      for (let id in cart_initial[cat]) {
+        qty = cart_initial[cat][id]['qty'];
+        fn = window[cat + '_click'];
+        fn(id, 'add', qty);
+      }
+    }
 
-</script>
+  </script>
 {% endblock %}

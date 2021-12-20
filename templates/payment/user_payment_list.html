@@ -1,4 +1,4 @@
-{% extends 'payment/_payment.html' %}
+{% extends '_qux_payments.html' %}
 {% load static %}
 
 {% block h1 %}Payments{% endblock %}
@@ -6,7 +6,7 @@
 {% block pagecontent %}
   <div class="container-xl my-4">
     <div id="invoice_list" class="">
-      <table class="table table-hover table-borderless table-sm">
+      <table class="table table-hover table-borderless table-sm qux-table table-listview">
         <thead>
           <tr>
             {% if admin_mode %}

@@ -3,10 +3,7 @@
 </div>
 <div class="dropdown-divider"></div>
 <div class="dropdown-item">
-  <a href="{% url 'customer:customer_home' %}">Customers</a>
-</div>
-<div class="dropdown-item">
-  <a href="{% url 'customer:address_home' %}">Addresses</a>
+  <a href="{% url 'customer:payment_home' %}">Payments</a>
 </div>
 <div class="dropdown-item">
   <a href="{% url 'customer:cart_home' %}">Carts</a>
@@ -15,5 +12,8 @@
   <a href="{% url 'customer:invoice_home' %}">Invoices</a>
 </div>
 <div class="dropdown-item">
-  <a href="{% url 'customer:payment_home' %}">Payments</a>
+  <a href="{% url 'customer:customer_home' %}">Customers</a>
+</div>
+<div class="dropdown-item">
+  <a href="{% url 'customer:address_home' %}">Addresses</a>
 </div>
